@@ -1,0 +1,436 @@
+/* PCBang Admin — Dashboard Styles
+   Loaded alongside styles.css */
+
+body { background: var(--pcb-bg); }
+
+/* ===================== LOGIN SCREEN ===================== */
+.admin-login-screen {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, var(--pcb-navy) 0%, #123063 60%, var(--pcb-navy-dark) 100%);
+  padding: 20px;
+}
+
+.admin-login-box {
+  background: white;
+  border-radius: var(--radius-lg);
+  padding: 40px 36px;
+  width: 100%;
+  max-width: 400px;
+  box-shadow: var(--shadow-lg);
+  text-align: center;
+}
+
+.admin-login-logo {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 800;
+  font-size: 26px;
+  color: var(--pcb-navy);
+  margin-bottom: 22px;
+}
+
+.admin-login-logo .bolt { color: var(--pcb-orange); font-size: 28px; }
+.admin-login-logo .logo-text-wrap { display: flex; flex-direction: column; line-height: 1; text-align: left; }
+.admin-login-logo .brand-name { white-space: nowrap; }
+.admin-login-logo .sub { font-size: 9px; font-weight: 700; letter-spacing: 1.5px; color: var(--pcb-text-light); margin-top: 3px; }
+
+.admin-login-box h2 { margin: 0 0 6px; font-size: 20px; font-weight: 800; color: var(--pcb-navy); }
+.admin-login-desc { font-size: 13px; color: var(--pcb-text-light); margin: 0 0 22px; }
+.admin-login-box form { text-align: left; }
+
+.admin-login-error {
+  background: #fde8e9;
+  color: var(--pcb-danger);
+  font-size: 12.5px;
+  font-weight: 600;
+  padding: 9px 12px;
+  border-radius: var(--radius-sm);
+  margin-bottom: 14px;
+  text-align: center;
+}
+
+.admin-login-hint {
+  font-size: 12px;
+  color: var(--pcb-text-light);
+  margin: 18px 0 0;
+}
+
+.admin-back-link {
+  display: inline-block;
+  margin-top: 14px;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--pcb-blue);
+}
+
+.admin-back-link:hover { text-decoration: underline; }
+
+/* ===================== APP SHELL ===================== */
+.admin-app {
+  display: flex;
+  min-height: 100vh;
+}
+
+.admin-sidebar {
+  width: 232px;
+  flex-shrink: 0;
+  background: var(--pcb-navy-dark);
+  color: #c7d1e3;
+  display: flex;
+  flex-direction: column;
+  padding: 22px 16px;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+}
+
+.admin-sidebar-logo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 800;
+  font-size: 21px;
+  color: white;
+  padding: 4px 8px 22px;
+}
+
+.admin-sidebar-logo .bolt { color: var(--pcb-orange); font-size: 22px; }
+.admin-sidebar-logo .logo-text-wrap { display: flex; flex-direction: column; line-height: 1; }
+.admin-sidebar-logo .brand-name { white-space: nowrap; }
+.admin-sidebar-logo .sub { font-size: 8px; font-weight: 700; letter-spacing: 1.3px; color: #8fa1c7; margin-top: 3px; }
+
+.admin-nav { display: flex; flex-direction: column; gap: 4px; flex: 1; }
+.admin-nav-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: none;
+  border: none;
+  color: #b7c2db;
+  padding: 11px 12px;
+  border-radius: var(--radius-sm);
+  font-size: 13.5px;
+  font-weight: 600;
+  text-align: left;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.admin-nav-item svg { width: 17px; height: 17px; flex-shrink: 0; }
+.admin-nav-item:hover { background: rgba(255,255,255,0.06); color: white; }
+.admin-nav-item.active { background: var(--pcb-blue); color: white; }
+
+.admin-sidebar-storefront, .admin-logout-btn {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 11px 12px;
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  font-weight: 600;
+  color: #94a3c2;
+  background: none;
+  border: none;
+  width: 100%;
+  text-align: left;
+  margin-top: 4px;
+}
+
+.admin-sidebar-storefront svg, .admin-logout-btn svg { width: 16px; height: 16px; }
+.admin-sidebar-storefront:hover { color: var(--pcb-blue-light); background: rgba(255,255,255,0.06); }
+.admin-logout-btn:hover { color: var(--pcb-danger); background: rgba(255,255,255,0.06); }
+
+.admin-main {
+  flex: 1;
+  padding: 30px 36px 60px;
+  min-width: 0;
+}
+
+.admin-view-header { margin-bottom: 24px; }
+.admin-view-header h1 { margin: 0 0 4px; font-size: 23px; font-weight: 800; color: var(--pcb-navy); }
+.admin-view-header p { margin: 0; font-size: 13.5px; color: var(--pcb-text-light); }
+.admin-view-header-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 14px;
+}
+
+.admin-filters {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin: -8px 0 20px;
+}
+
+.admin-filter-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.admin-filter-group label {
+  color: var(--pcb-text-light);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.admin-filter-group select {
+  border: 1px solid var(--pcb-border);
+  border-radius: var(--radius-sm);
+  background: white;
+  color: var(--pcb-text);
+  font: inherit;
+  font-size: 12.5px;
+  padding: 8px 28px 8px 10px;
+}
+
+/* ===================== STATS CARDS ===================== */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  margin-bottom: 28px;
+}
+
+.stat-card {
+  background: white;
+  border-radius: var(--radius-lg);
+  padding: 20px;
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  border-left: 4px solid var(--pcb-blue);
+}
+
+.stat-card.orange { border-left-color: var(--pcb-orange); }
+.stat-card.green { border-left-color: var(--pcb-success); }
+.stat-card.red { border-left-color: var(--pcb-danger); }
+
+.stat-card-top { display: flex; align-items: center; justify-content: space-between; }
+.stat-icon {
+  width: 40px; height: 40px;
+  border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  background: #eaf1ff; color: var(--pcb-blue);
+}
+
+.stat-card.orange .stat-icon { background: #fff2e0; color: var(--pcb-orange); }
+.stat-card.green .stat-icon { background: #e5f7ea; color: var(--pcb-success); }
+.stat-card.red .stat-icon { background: #fde8e9; color: var(--pcb-danger); }
+.stat-icon svg { width: 20px; height: 20px; }
+
+.stat-value { font-size: 26px; font-weight: 800; color: var(--pcb-navy); }
+.stat-label { font-size: 12.5px; color: var(--pcb-text-light); font-weight: 600; }
+
+/* ===================== PANELS + TABLES ===================== */
+.admin-panel {
+  background: white;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
+  margin-bottom: 24px;
+}
+
+.admin-panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 20px;
+  border-bottom: 1px solid var(--pcb-border);
+}
+
+.admin-panel-header h3 { margin: 0; font-size: 15px; font-weight: 800; color: var(--pcb-navy); }
+.badge-count {
+  background: #fde8e9;
+  color: var(--pcb-danger);
+  font-size: 12px;
+  font-weight: 800;
+  padding: 3px 10px;
+  border-radius: 20px;
+}
+
+.admin-table-wrap { overflow-x: auto; }
+.admin-table { width: 100%; border-collapse: collapse; min-width: 640px; }
+.admin-table th {
+  text-align: left;
+  font-size: 11.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  color: var(--pcb-text-light);
+  font-weight: 700;
+  padding: 12px 20px;
+  background: #f8f9fc;
+  border-bottom: 1px solid var(--pcb-border);
+}
+
+.admin-table td {
+  padding: 13px 20px;
+  font-size: 13.5px;
+  border-bottom: 1px solid var(--pcb-border);
+  color: var(--pcb-text);
+  vertical-align: middle;
+}
+
+.admin-table tr:last-child td { border-bottom: none; }
+.admin-table tr:hover td { background: #fafbff; }
+
+.table-product-cell { display: flex; align-items: center; gap: 10px; }
+.table-product-icon {
+  width: 36px; height: 36px;
+  background: #f6f8fc;
+  border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--pcb-blue);
+  flex-shrink: 0;
+}
+
+.table-product-icon svg { width: 18px; height: 18px; }
+.table-product-icon img { width: 100%; height: 100%; object-fit: contain; border-radius: 8px; }
+.table-product-icon .image-fallback { display: flex; align-items: center; justify-content: center; width: 100%; height: 100%; }
+.table-product-icon.has-product-image:not(.image-load-failed) .image-fallback { display: none; }
+.table-product-title { font-weight: 600; max-width: 260px; }
+
+.pill { font-size: 11px; font-weight: 700; padding: 3px 9px; border-radius: 20px; display: inline-block; }
+.pill.blue { background: #eaf1ff; color: var(--pcb-blue); }
+.pill.green { background: #e5f7ea; color: var(--pcb-success); }
+.pill.orange { background: #fff2e0; color: var(--pcb-orange); }
+.pill.red { background: #fde8e9; color: var(--pcb-danger); }
+.pill.gray { background: #eef0f5; color: var(--pcb-text-light); }
+
+.table-actions { display: flex; gap: 8px; }
+.icon-btn {
+  width: 30px; height: 30px;
+  border-radius: 7px;
+  border: 1px solid var(--pcb-border);
+  background: white;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--pcb-text-light);
+  transition: all 0.15s ease;
+}
+
+.icon-btn svg { width: 15px; height: 15px; }
+.icon-btn:hover { border-color: var(--pcb-blue); color: var(--pcb-blue); }
+.icon-btn.danger:hover { border-color: var(--pcb-danger); color: var(--pcb-danger); background: #fde8e9; }
+
+/* Toggle switch for flash sale */
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 40px;
+  height: 22px;
+}
+
+.switch input { opacity: 0; width: 0; height: 0; }
+.switch .slider {
+  position: absolute; cursor: pointer; inset: 0;
+  background: #cbd3e0;
+  border-radius: 22px;
+  transition: 0.2s;
+}
+
+.switch .slider::before {
+  content: "";
+  position: absolute;
+  height: 16px; width: 16px;
+  left: 3px; bottom: 3px;
+  background: white;
+  border-radius: 50%;
+  transition: 0.2s;
+}
+
+.switch input:checked + .slider { background: var(--pcb-orange); }
+.switch input:checked + .slider::before { transform: translateX(18px); }
+
+/* Buttons */
+.btn-accent {
+  background: var(--pcb-orange);
+  color: white;
+  border: none;
+  padding: 11px 20px;
+  border-radius: var(--radius-md);
+  font-size: 13.5px;
+  font-weight: 700;
+  transition: background 0.15s ease;
+}
+
+.btn-accent:hover { background: #e65f00; }
+
+.btn-secondary {
+  flex: 1;
+  background: #eef0f5;
+  color: var(--pcb-text);
+  border: none;
+  padding: 11px;
+  border-radius: var(--radius-md);
+  font-size: 13.5px;
+  font-weight: 700;
+}
+
+.btn-secondary:hover { background: #e2e6ee; }
+
+.btn-danger {
+  flex: 1;
+  background: var(--pcb-danger);
+  color: white;
+  border: none;
+  padding: 11px;
+  border-radius: var(--radius-md);
+  font-size: 13.5px;
+  font-weight: 700;
+}
+
+.btn-danger:hover { background: #c72530; }
+
+.checkbox-group { display: flex; align-items: center; }
+.checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--pcb-text);
+  cursor: pointer;
+}
+
+.checkbox-label input { width: 16px; height: 16px; }
+.file-help { display: block; margin-top: 6px; color: var(--pcb-text-light); font-size: 11px; line-height: 1.4; }
+
+.empty-row td {
+  text-align: center;
+  padding: 36px 20px;
+  color: var(--pcb-text-light);
+  font-size: 13px;
+}
+
+.empty-row { grid-column: 1 / -1; text-align: center; padding: 36px 20px; color: var(--pcb-text-light); font-size: 13px; }
+
+/* ===================== RESPONSIVE ===================== */
+@media (max-width: 980px) {
+  .stats-grid { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (max-width: 760px) {
+  .admin-app { flex-direction: column; }
+  .admin-sidebar {
+    width: 100%;
+    height: auto;
+    position: relative;
+    flex-direction: row;
+    align-items: center;
+    flex-wrap: wrap;
+    padding: 14px 16px;
+  }
+  .admin-sidebar-logo { padding: 0; margin-right: auto; }
+  .admin-nav { flex-direction: row; flex: none; }
+  .admin-sidebar-storefront, .admin-logout-btn { width: auto; }
+  .admin-main { padding: 20px 16px 50px; }
+  .stats-grid { grid-template-columns: 1fr 1fr; }
+  .product-detail-layout, .product-detail-columns { grid-template-columns: 1fr; gap: 14px; }
+  .product-detail-image { height: 190px; }
+}

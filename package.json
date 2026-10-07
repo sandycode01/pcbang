@@ -1,0 +1,20 @@
+{
+  "name": "pcbang",
+  "version": "1.0.0",
+  "description": "PCBang - Online store exclusively for PC parts and accessories",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js",
+    "db:init": "mysql -u root -p < database.sql"
+  },
+  "dependencies": {
+    "dotenv": "^17.4.2",
+    "express": "^4.19.2",
+    "multer": "^2.2.0",
+    "mysql2": "^3.23.4"
+  },
+  "engines": {
+    "node": ">=16"
+  }
+}

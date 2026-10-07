@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>PCBang | Philippines' Leading PC Store</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Audiowide&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/css/styles.css" />
+</head>
+<body>
+
+<!-- TOP UTILITY BAR -->
+<div class="top-bar">
+  <div class="container">
+    <div class="top-bar-links">
+      <a href="#">Sell on PCBang</a>
+      <a href="#">Track Your Order</a>
+      <a href="#">Help Center</a>
+      <a href="#">English</a>
+    </div>
+    <div class="top-bar-links">
+      <a href="#">Shipping: Nationwide</a>
+      <a href="#">Tracking Information</a>
+    </div>
+  </div>
+</div>
+
+<!-- HEADER -->
+<header class="site-header">
+  <div class="container header-inner">
+    <a href="/store.html" class="logo">
+     <span class="logo-text-wrap"><span class="PC">PC</span>Bang</span>
+    </a>
+
+    <form class="search-form" id="searchForm">
+      <input type="text" id="searchInput" placeholder="Search for GPUs, CPUs, RAM, and more..." autocomplete="off" />
+      <button type="submit">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        Search
+      </button>
+    </form>
+
+    <div class="header-actions">
+      <button class="header-action" id="wishlistBtn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.8 1-1a5.5 5.5 0 0 0 0-7.6z"/></svg>
+        <span title="Wishlist" class="action-label">Wishlist</span>
+        <span class="cart-count hidden" id="wishlistCount">0</span>
+      </button>
+      <button class="header-action" id="cartBtn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.7 13.4a2 2 0 0 0 2 1.6h9.7a2 2 0 0 0 2-1.6L23 6H6"/></svg>
+        <span title="Cart" class="action-label">Cart</span>
+        <span class="cart-count hidden" id="cartCount">0</span>
+      </button>
+      <button class="header-action" id="supportBtn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22c5.5 0 10-4.5 10-10S17.5 2 12 2 2 6.5 2 12c0 1.8.5 3.5 1.3 5L2 22l5-1.3c1.5.8 3.2 1.3 5 1.3z"/></svg>
+        <span title="Support" class="action-label">Support</span>
+      </button>
+      <button class="header-action" id="loginBtn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        <span title="Login" class="action-label">Login</span>
+      </button>
+    </div>
+  </div>
+
+  <nav class="category-nav">
+    <div class="container" id="categoryNavStrip">
+      <!-- populated by JS -->
+    </div>
+  </nav>
+</header>
+
+<main class="container">
+
+  <!-- FLASH SALE -->
+  <section class="flash-sale-section">
+    <div class="flash-sale-banner">
+      <div class="flash-sale-header">
+        <div class="flash-sale-title">
+          <span class="bolt-icon">⚡</span>
+          <div>
+            <h2>Flash Sale</h2>
+            <p>Limited-time deals on top PC products, grab them before stock runs out!</p>
+          </div>
+        </div>
+        <div class="countdown" id="countdown">
+          <span class="countdown-label">Ends in</span>
+          <div class="countdown-unit"><span id="cd-hours">00</span><small>Hrs</small></div>
+          <span class="countdown-sep">:</span>
+          <div class="countdown-unit"><span id="cd-minutes">00</span><small>Min</small></div>
+          <span class="countdown-sep">:</span>
+          <div class="countdown-unit"><span id="cd-seconds">00</span><small>Sec</small></div>
+        </div>
+        <a href="#justForYou" class="see-all-link">See All Deals →</a>
+      </div>
+
+      <div class="flash-scroll" id="flashScroll">
+        <!-- populated by JS -->
+      </div>
+    </div>
+  </section>
+
+  <!-- CATEGORY GRID -->
+  <section class="section">
+    <div class="section-heading">
+      <div>
+        <h2>Shop by Category</h2>
+        <p class="subtitle">Everything you need to build or upgrade your rig</p>
+      </div>
+    </div>
+    <div class="category-grid" id="categoryGrid">
+      <!-- populated by JS -->
+    </div>
+  </section>
+
+  <!-- PROMO STRIP -->
+  <section class="promo-strip">
+    <div class="promo-card p1">
+      <h3>Free Shipping</h3>
+      <p>On all orders over ₱3,000 nationwide</p>
+    </div>
+    <div class="promo-card p2">
+      <h3>0% Installment</h3>
+      <p>Available on GPUs, CPUs, and full builds</p>
+    </div>
+    <div class="promo-card p3">
+      <h3>Warranty Assured</h3>
+      <p>Genuine parts with manufacturer warranty</p>
+    </div>
+  </section>
+
+  <!-- JUST FOR YOU -->
+  <section class="section" id="justForYou">
+    <div class="section-heading">
+      <div>
+        <h2 id="feedHeading">Just For You</h2>
+        <p class="subtitle" id="feedSubtitle">Handpicked PC parts based on what's trending</p>
+      </div>
+    </div>
+
+    <div class="filter-pills" id="filterPills">
+      <!-- populated by JS -->
+    </div>
+
+    <div class="product-grid" id="productGrid">
+      <!-- populated by JS -->
+    </div>
+  </section>
+
+</main>
+
+<!-- FOOTER -->
+<footer class="site-footer">
+  <div class="container footer-columns">
+    <div>
+      <h4>Customer Care</h4>
+      <ul>
+        <li><a href="#">Help Center</a></li>
+        <li><a href="#">How to Buy</a></li>
+        <li><a href="#">Returns &amp; Refunds</a></li>
+        <li><a href="#">Warranty Claims</a></li>
+        <li><a href="#">Contact Us</a></li>
+      </ul>
+    </div>
+    <div>
+      <h4>Delivery Options</h4>
+      <ul>
+        <li><a href="#">Standard Delivery</a></li>
+        <li><a href="#">Same-Day Delivery</a></li>
+        <li><a href="#">Store Pickup</a></li>
+        <li><a href="#">Track My Order</a></li>
+      </ul>
+    </div>
+    <div>
+      <h4>Payment Methods</h4>
+      <ul>
+        <li><a href="#">Credit / Debit Card</a></li>
+        <li><a href="#">GCash / Maya</a></li>
+        <li><a href="#">Bank Transfer</a></li>
+        <li><a href="#">Cash on Delivery</a></li>
+        <li><a href="#">Installment Plans</a></li>
+      </ul>
+    </div>
+    <div>
+      <h4>About PCBang</h4>
+      <ul>
+        <li><a href="#">Our Story</a></li>
+        <li><a href="#">Careers</a></li>
+        <li><a href="#">Seller Center</a></li>
+        <li><a href="/admin">Admin Dashboard</a></li>
+      </ul>
+    </div>
+    <div class="footer-brand">
+      <div class="logo">
+        <span class="logo-text-wrap"><span class="PC">PC</span>Bang</span>
+      </div>
+      <p>The Philippines' go-to online store for processors, graphics cards, and everything you need to build your dream PC.</p>
+      <div class="payment-icons">
+        <span>VISA</span><span>Mastercard</span><span>GCash</span><span>Maya</span><span>COD</span>
+      </div>
+      <div class="social-icons">
+        <a href="#" aria-label="Facebook"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M13.5 21v-7.5h2.5l.5-3h-3V8.2c0-.9.3-1.5 1.6-1.5H16.5V4.1C16.2 4 15.3 4 14.2 4c-2.3 0-3.9 1.4-3.9 4v2.5H7.8v3h2.5V21h3.2z"/></svg></a>
+        <a href="#" aria-label="Twitter"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M22 5.9c-.7.3-1.5.6-2.3.7.8-.5 1.5-1.3 1.8-2.3-.8.5-1.7.8-2.6 1a4.1 4.1 0 0 0-7 3.7A11.6 11.6 0 0 1 3.4 4.6a4.1 4.1 0 0 0 1.3 5.5c-.7 0-1.3-.2-1.9-.5v.1c0 2 1.4 3.6 3.3 4a4.1 4.1 0 0 1-1.9.1 4.1 4.1 0 0 0 3.8 2.9A8.2 8.2 0 0 1 2 18.4a11.6 11.6 0 0 0 6.3 1.8c7.5 0 11.7-6.3 11.7-11.7v-.5c.8-.6 1.5-1.3 2-2.1z"/></svg></a>
+        <a href="#" aria-label="Instagram"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.2c2.7 0 3 0 4 .1 1 0 1.7.2 2.1.4.5.2.9.5 1.3.9.4.4.7.8.9 1.3.2.4.4 1.1.4 2.1.1 1 .1 1.3.1 4s0 3-.1 4c0 1-.2 1.7-.4 2.1-.2.5-.5.9-.9 1.3-.4.4-.8.7-1.3.9-.4.2-1.1.4-2.1.4-1 .1-1.3.1-4 .1s-3 0-4-.1c-1 0-1.7-.2-2.1-.4-.5-.2-.9-.5-1.3-.9-.4-.4-.7-.8-.9-1.3-.2-.4-.4-1.1-.4-2.1-.1-1-.1-1.3-.1-4s0-3 .1-4c0-1 .2-1.7.4-2.1.2-.5.5-.9.9-1.3.4-.4.8-.7 1.3-.9.4-.2 1.1-.4 2.1-.4 1-.1 1.3-.1 4-.1zM12 7a5 5 0 1 0 0 10 5 5 0 0 0 0-10zm0 8.2a3.2 3.2 0 1 1 0-6.4 3.2 3.2 0 0 1 0 6.4zm5.2-8.4a1.2 1.2 0 1 1-2.4 0 1.2 1.2 0 0 1 2.4 0z"/></svg></a>
+        <a href="#" aria-label="YouTube"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M21.8 8s-.2-1.4-.8-2c-.8-.8-1.7-.8-2.1-.9C16.6 5 12 5 12 5h0s-4.6 0-6.9.1c-.4 0-1.3.1-2.1.9-.6.6-.8 2-.8 2S2 9.6 2 11.3v1.4c0 1.7.2 3.3.2 3.3s.2 1.4.8 2c.8.8 1.9.8 2.4.9C7.4 19 12 19 12 19s4.6 0 6.9-.1c.4 0 1.3-.1 2.1-.9.6-.6.8-2 .8-2s.2-1.7.2-3.3v-1.4c0-1.7-.2-3.3-.2-3.3zM10 14V10l4 2-4 2z"/></svg></a>
+        <a href="#" aria-label="LinkedIn"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2h-1a2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></svg></a>
+    </div>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <div class="container">
+      &copy; 2026 PCBang. All rights reserved. This is a demo project for educational purposes.
+    </div>
+  </div>
+</footer>
+
+<!-- CART SIDE PANEL -->
+<div class="overlay" id="overlay"></div>
+<aside class="cart-panel" id="cartPanel">
+  <div class="cart-header">
+    <h3>My Cart</h3>
+    <button class="close-btn" id="closeCartBtn">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </button>
+  </div>
+  <div class="cart-items" id="cartItems">
+    <!-- populated by JS -->
+  </div>
+  <div class="cart-footer" id="cartFooter">
+    <div class="cart-subtotal-row"><span>Subtotal</span><span id="cartSubtotal">₱0</span></div>
+    <div class="cart-total-row"><span>Total</span><span id="cartTotal">₱0</span></div>
+    <button class="checkout-btn" id="checkoutBtn">Proceed to Checkout</button>
+  </div>
+</aside>
+
+<!-- CHECKOUT MODAL -->
+<div class="modal" id="checkoutModal">
+  <div class="modal-backdrop"></div>
+  <div class="modal-box wide">
+    <button class="modal-close" data-close-modal="checkoutModal">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </button>
+    <h3>Checkout</h3>
+    <p class="modal-desc">Fill in your delivery details to complete this mock order.</p>
+
+    <div class="order-summary-box" id="checkoutSummary"></div>
+
+    <form id="checkoutForm">
+      <div class="form-group">
+        <label for="ckName">Full Name</label>
+        <input type="text" id="ckName" required placeholder="Juan Dela Cruz" />
+      </div>
+      <div class="form-group">
+        <label for="ckAddress">Delivery Address</label>
+        <input type="text" id="ckAddress" required placeholder="123 Rizal St., Davao City" />
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label for="ckPhone">Phone Number</label>
+          <input type="tel" id="ckPhone" required placeholder="09XX XXX XXXX" />
+        </div>
+        <div class="form-group">
+          <label for="ckPayment">Payment Method</label>
+          <select id="ckPayment">
+            <option>Cash on Delivery</option>
+            <option>GCash</option>
+            <option>Credit / Debit Card</option>
+            <option>Bank Transfer</option>
+          </select>
+        </div>
+      </div>
+      <button type="submit" class="btn-primary">Place Order</button>
+    </form>
+  </div>
+</div>
+
+<!-- ORDER SUCCESS MODAL -->
+<div class="modal" id="successModal">
+  <div class="modal-backdrop"></div>
+  <div class="modal-box">
+    <button class="modal-close" data-close-modal="successModal">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </button>
+    <div class="modal-icon-success">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+    </div>
+    <h3>Order Placed!</h3>
+    <p class="modal-desc" id="successMessage">Thank you for shopping with PCBang. Your mock order has been received.</p>
+    <button class="btn-primary" data-close-modal="successModal">Continue Shopping</button>
+  </div>
+</div>
+
+<!-- LOGIN MODAL -->
+<div class="modal" id="loginModal">
+  <div class="modal-backdrop"></div>
+  <div class="modal-box">
+    <button class="modal-close" data-close-modal="loginModal">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </button>
+    <h3>Welcome to <span class="PC">PC</span>Bang</h3>
+    <p class="modal-desc">Log in or sign up to track orders and save your wishlist.</p>
+    <form id="loginForm">
+      <div class="form-group">
+        <label for="loginEmail">Email Address</label>
+        <input type="email" id="loginEmail" required placeholder="juan.delacruz@gmail.com"/>
+      </div>
+      <div class="form-group">
+        <label for="loginPassword">Password</label>
+        <input type="password" id="loginPassword" required placeholder="••••••••" />
+      </div>
+      <button type="submit" class="btn-primary">Log In</button>
+    </form>
+    <form id="signupForm" class="hidden">
+      <div class="form-group">
+        <label for="signupName">Full Name</label>
+        <input type="text" id="signupName" required placeholder="Juan Dela Cruz" autocomplete="name" />
+      </div>
+      <div class="form-group">
+        <label for="signupEmail">Email Address</label>
+        <input type="email" id="signupEmail" required placeholder="juan.delacruz@gmail.com" autocomplete="email" />
+      </div>
+      <div class="form-group">
+        <label for="signupPassword">Password</label>
+        <input type="password" id="signupPassword" required minlength="6" placeholder="At least 6 characters" autocomplete="new-password" />
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label for="signupAge">Age</label>
+          <input type="number" id="signupAge" required min="13" max="120" placeholder="18" autocomplete="bday" />
+        </div>
+        <div class="form-group">
+          <label for="signupPhone">Phone Number</label>
+          <input type="tel" id="signupPhone" required placeholder="09XX XXX XXXX" autocomplete="tel" />
+        </div>
+      </div>
+      <div class="form-group">
+        <label for="signupAddress">Address</label>
+        <input type="text" id="signupAddress" required placeholder="123 Rizal St., Davao City" autocomplete="street-address" />
+      </div>
+      <button type="submit" class="btn-primary">Create Account</button>
+    </form>
+    <button type="button" class="auth-switch-btn" id="authSwitchBtn">Create an account</button>
+  </div>
+</div>
+
+<!-- ACCOUNT MODAL -->
+<div class="modal" id="accountModal">
+  <div class="modal-backdrop"></div>
+  <div class="modal-box wide">
+    <button class="modal-close" data-close-modal="accountModal" aria-label="Close account">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </button>
+    <h3>My Account</h3>
+    <div id="accountContent"></div>
+  </div>
+</div>
+
+<!-- PRODUCT DETAILS MODAL -->
+<div class="modal" id="productDetailsModal">
+  <div class="modal-backdrop"></div>
+  <div class="modal-box wide storefront-product-modal">
+    <button class="modal-close" data-close-modal="productDetailsModal" aria-label="Close product details">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </button>
+    <div id="productDetailsContent"></div>
+  </div>
+</div>
+
+<!-- TOASTS -->
+<div class="toast-container" id="toastContainer"></div>
+
+<script src="/js/icons.js"></script>
+<script src="/js/app.js"></script>
+</body>
+</html>

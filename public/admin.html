@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>PCBang Admin | Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Audiowide&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/css/styles.css" />
+<link rel="stylesheet" href="/css/admin.css" />
+</head>
+<body>
+
+<!-- ===================== LOGIN SCREEN ===================== -->
+<div class="admin-login-screen" id="loginScreen">
+  <div class="admin-login-box">
+    <div class="admin-login-logo">
+      <span class="logo-text-wrap"><span class="brand-name"><span class="PC">PC</span>Bang</span></span>
+    </div>
+    <h2>Admin Login</h2>
+    <p class="admin-login-desc">Restricted access. Authorized personnel only.</p>
+
+    <form id="adminLoginForm" autocomplete="off">
+      <div class="form-group">
+        <label for="adminUsername">Username</label>
+        <input type="text" id="adminUsername" placeholder="admin" required autocomplete="new-password" readonly />
+      </div>
+      <div class="form-group">
+        <label for="adminPassword">Password</label>
+        <input type="password" id="adminPassword" placeholder="••••••••" required autocomplete="new-password" readonly />
+      </div>
+      <div class="admin-login-error hidden" id="loginError">Invalid username or password.</div>
+      <button type="submit" class="btn-primary">Log In</button>
+    </form>
+
+    <a href="/store.html" class="admin-back-link">← Back to Storefront</a>
+  </div>
+</div>
+
+<!-- ===================== DASHBOARD ===================== -->
+<div class="admin-app hidden" id="adminApp">
+
+  <aside class="admin-sidebar">
+    <div class="admin-sidebar-logo">
+      <span class="logo-text-wrap"><span class="brand-name"><span class="PC">PC</span>Bang</span><span class="sub">ADMIN PANEL</span></span>
+    </div>
+    <nav class="admin-nav">
+      <button class="admin-nav-item active" data-view="overview">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="9"/><rect x="14" y="3" width="7" height="5"/><rect x="14" y="12" width="7" height="9"/><rect x="3" y="16" width="7" height="5"/></svg>
+        Overview
+      </button>
+      <button class="admin-nav-item" data-view="products">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 8l-9-5-9 5 9 5 9-5z"/><path d="M3 8v8l9 5 9-5V8"/><path d="M12 13v8"/></svg>
+        Products
+      </button>
+      <button class="admin-nav-item" data-view="flashsale">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+        Flash Sale
+      </button>
+    </nav>
+    <a href="/store.html" class="admin-sidebar-storefront">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
+      View Storefront
+    </a>
+    <button class="admin-logout-btn" id="logoutBtn">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+      Log Out
+    </button>
+  </aside>
+
+  <main class="admin-main">
+
+    <!-- OVERVIEW VIEW -->
+    <section class="admin-view" id="view-overview">
+      <div class="admin-view-header">
+        <h1>Dashboard Overview</h1>
+        <p>Welcome back, admin. Here's what's happening at PCBang today.</p>
+      </div>
+
+      <div class="stats-grid" id="statsGrid">
+        <!-- populated by JS -->
+      </div>
+
+      <div class="admin-filters" aria-label="Low stock category filter">
+        <div class="admin-filter-group">
+          <label for="overviewCategoryFilter">Category</label>
+          <select id="overviewCategoryFilter" class="category-filter">
+            <option value="all">All categories</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="admin-panel">
+        <div class="admin-panel-header">
+          <h3>Low Stock Alerts</h3>
+          <span class="badge-count" id="lowStockBadge">0</span>
+        </div>
+        <div class="admin-table-wrap">
+          <table class="admin-table" id="lowStockTable">
+            <thead>
+              <tr><th>Product</th><th>Category</th><th>Stock</th><th>Status</th></tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- PRODUCTS VIEW -->
+    <section class="admin-view hidden" id="view-products">
+      <div class="admin-view-header admin-view-header-row">
+        <div>
+          <h1>Product Management</h1>
+          <p>Add, edit, or remove products from the catalog.</p>
+        </div>
+        <button class="btn-accent" id="openAddProductBtn">+ Add Product</button>
+      </div>
+
+      <div class="admin-filters" aria-label="Product category filter">
+        <div class="admin-filter-group">
+          <label for="productsCategoryFilter">Category</label>
+          <select id="productsCategoryFilter" class="category-filter">
+            <option value="all">All categories</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="admin-panel">
+        <div class="admin-table-wrap">
+          <table class="admin-table" id="productsTable">
+            <thead><tr><th>Product</th><th>Category</th><th>Price</th><th>Discount</th><th>Stock</th><th>Flash Sale</th><th>Actions</th></tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- FLASH SALE VIEW -->
+    <section class="admin-view hidden" id="view-flashsale">
+      <div class="admin-view-header">
+        <h1>Flash Sale Management</h1>
+        <p>Toggle which products appear in the storefront's Flash Sale banner.</p>
+      </div>
+      <div class="admin-filters" aria-label="Flash sale category filter">
+        <div class="admin-filter-group">
+          <label for="flashCategoryFilter">Category</label>
+          <select id="flashCategoryFilter" class="category-filter">
+            <option value="all">All categories</option>
+          </select>
+        </div>
+      </div>
+      <div class="admin-panel">
+        <div class="admin-table-wrap">
+          <table class="admin-table" id="flashSaleTable">
+            <thead>
+              <tr><th>Product</th><th>Category</th><th>Regular Price</th><th>Sale Price</th><th>In Flash Sale</th></tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<!-- ===================== ADD / EDIT PRODUCT MODAL ===================== -->
+<div class="modal" id="productModal">
+  <div class="modal-backdrop"></div>
+  <div class="modal-box wide">
+    <button class="modal-close" data-close-modal="productModal">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </button>
+    <h3 id="productModalTitle">Add New Product</h3>
+    <p class="modal-desc">Fill in the details below.</p>
+
+    <form id="productForm">
+      <input type="hidden" id="pfId" />
+      <div class="form-group">
+        <label for="pfTitle">Product Title</label>
+        <input type="text" id="pfTitle" required placeholder="e.g. GeForce RTX 4070 12GB Graphics Card" />
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="pfCategory">Category</label>
+          <select id="pfCategory" required></select>
+        </div>
+        <div class="form-group">
+          <label for="pfStock">Stock Quantity</label>
+          <input type="number" id="pfStock" min="0" required placeholder="0" />
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="pfPrice">Regular Price (₱)</label>
+          <input type="number" id="pfPrice" min="0" required placeholder="0" />
+        </div>
+        <div class="form-group">
+          <label for="pfDiscountPrice">Discount Price (₱, optional)</label>
+          <input type="number" id="pfDiscountPrice" min="0" placeholder="Leave blank if none" />
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="pfImageFile">Product Image</label>
+          <input type="file" id="pfImageFile" accept="image/png,image/jpeg,image/webp,image/gif" />
+          <input type="hidden" id="pfImage" />
+          <small class="file-help" id="pfImageHelp">Choose an image from your computer. Existing image stays when no new file is selected.</small>
+        </div>
+        <div class="form-group">
+          <label for="pfRating">Rating (0–5)</label>
+          <input type="number" id="pfRating" min="0" max="5" step="0.1" placeholder="4.5" />
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="pfSpecs">Specifications</label>
+        <textarea id="pfSpecs" rows="3" placeholder="e.g. 12GB GDDR6X, PCIe 4.0, 2610MHz Boost Clock"></textarea>
+      </div>
+
+      <div class="form-group checkbox-group">
+        <label class="checkbox-label">
+          <input type="checkbox" id="pfFlashSale" />
+          Include in Flash Sale
+        </label>
+      </div>
+
+      <button type="submit" class="btn-primary">Save Product</button>
+    </form>
+  </div>
+</div>
+
+<!-- ===================== DELETE CONFIRM MODAL ===================== -->
+<div class="modal" id="deleteModal">
+  <div class="modal-backdrop"></div>
+  <div class="modal-box">
+    <button class="modal-close" data-close-modal="deleteModal">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </button>
+    <h3>Delete Product?</h3>
+    <p class="modal-desc" id="deleteModalDesc">This action cannot be undone.</p>
+    <div class="form-row">
+      <button class="btn-secondary" data-close-modal="deleteModal">Cancel</button>
+      <button class="btn-danger" id="confirmDeleteBtn">Delete</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast-container" id="toastContainer"></div>
+
+<script src="/js/icons.js"></script>
+<script src="/js/admin.js"></script>
+</body>
+</html>
