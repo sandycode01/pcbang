@@ -184,5 +184,3 @@ pcbang/
   MySQL, but production still requires stronger session expiration/revocation,
   CSRF protection, validation/rate limiting, secure environment-based secrets,
   and a payment provider.
-
-- Hello World!
