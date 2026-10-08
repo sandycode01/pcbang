@@ -127,6 +127,7 @@
       ]);
       state.categories = await catRes.json();
       state.allProducts = await prodRes.json();
+      syncWishlistWithProducts();
 
       renderCategoryNav();
       renderCategoryGrid();
@@ -147,6 +148,7 @@
         const response = await fetch("/api/products", { cache: "no-store" });
         if (!response.ok) return;
         state.allProducts = await response.json();
+        syncWishlistWithProducts();
         applyFilters();
         renderFlashSale();
       } catch (err) {
@@ -355,10 +357,13 @@
   function renderProductGrid() {
     const list = state.filteredProducts;
     if (list.length === 0) {
+      const emptyMessage = state.showingWishlist
+        ? "Your wishlist is empty. Tap a heart on a product to save it here."
+        : "No products found. Try a different search or category.";
       el.productGrid.innerHTML = `
         <div class="empty-state">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-          <p>No products found. Try a different search or category.</p>
+          <p>${emptyMessage}</p>
         </div>`;
       return;
     }
@@ -598,6 +603,19 @@
     el.wishlistCount.classList.toggle("hidden", state.wishlist.length === 0);
   }
 
+  function syncWishlistWithProducts() {
+    const availableProductIds = new Set(state.allProducts.map((product) => product.id));
+    const validWishlist = [...new Set(state.wishlist.filter((id) => availableProductIds.has(id)))];
+    const changed = validWishlist.length !== state.wishlist.length ||
+      validWishlist.some((id, index) => id !== state.wishlist[index]);
+
+    if (changed) {
+      state.wishlist = validWishlist;
+      saveToStorage("pcbang_wishlist", state.wishlist);
+    }
+    updateWishlistBadge();
+  }
+
   function toggleWishlist(productId) {
     const idx = state.wishlist.indexOf(productId);
     if (idx === -1) {
@@ -609,7 +627,7 @@
     }
     saveToStorage("pcbang_wishlist", state.wishlist);
     updateWishlistBadge();
-    renderProductGrid();
+    applyFilters();
   }
 
   function renderCartPanel() {
