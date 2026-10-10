@@ -929,55 +929,74 @@
   }
 
   async function submitAuth(url, body, message) {
-    const response = await fetch(url, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(body)
-    });
-    const data = await response.json();
-    if (!response.ok) {
-      showToast(data.error || "Authentication failed.");
-      return;
+    try {
+      const response = await fetch(url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body)
+      });
+      const data = await response.json();
+      if (!response.ok) {
+        showToast(data.error || "Authentication failed.");
+        return;
+      }
+      setCurrentUser(data.token, data.user);
+      closeModal("loginModal");
+      el.loginForm.reset();
+      showToast(message);
+    } catch (error) {
+      console.error("Authentication request failed:", error);
+      showToast("Unable to reach the server. Please try again.");
     }
-    setCurrentUser(data.token, data.user);
-    closeModal("loginModal");
-    el.loginForm.reset();
-    showToast(message);
   }
 
   async function openAccount() {
     openModal("accountModal");
     el.accountContent.innerHTML = "<p class=\"modal-desc\">Loading your account...</p>";
-    const response = await fetch("/api/account", { headers: authHeaders() });
-    if (!response.ok) {
-      setCurrentUser("", null);
-      closeModal("accountModal");
-      showToast("Your session expired. Please log in again.");
-      return;
+    try {
+      const response = await fetch("/api/account", { headers: authHeaders() });
+      if (response.status === 401) {
+        setCurrentUser("", null);
+        closeModal("accountModal");
+        showToast("Your session expired. Please log in again.");
+        return;
+      }
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || "Unable to load your account.");
+
+      setCurrentUser(state.authToken, data.user);
+      const orders = data.orders || [];
+      el.accountContent.innerHTML = `
+        <div class="account-details"><p><strong>${data.user.name}</strong><br>${data.user.email}</p><p>Age: ${data.user.age}<br>Phone: ${data.user.phone}<br>${data.user.address}</p></div>
+        <div class="account-section-heading"><h4>Order Items</h4><span>${orders.length} order${orders.length === 1 ? "" : "s"}</span></div>
+        ${orders.length ? orders.map(accountOrderTemplate).join("") : "<p class=\"modal-desc\">No orders yet.</p>"}
+        <button type="button" class="auth-switch-btn" id="logoutBtn">Log out</button>`;
+      document.getElementById("logoutBtn").addEventListener("click", async () => {
+        try {
+          const logoutResponse = await fetch("/api/auth/logout", { method: "POST", headers: authHeaders() });
+          if (!logoutResponse.ok) throw new Error("Unable to log out. Please try again.");
+          setCurrentUser("", null);
+          closeModal("accountModal");
+          showToast("You have been logged out.");
+        } catch (error) {
+          console.error("Logout request failed:", error);
+          showToast(error.message || "Unable to reach the server. Please try again.");
+        }
+      });
+    } catch (error) {
+      console.error("Account request failed:", error);
+      el.accountContent.innerHTML = "<p class=\"modal-desc\">Unable to load your account. Please try again.</p>";
+      showToast(error.message || "Unable to reach the server. Please try again.");
     }
-    const data = await response.json();
-    setCurrentUser(state.authToken, data.user);
-    const orders = data.orders || [];
-    el.accountContent.innerHTML = `
-      <div class="account-details"><p><strong>${data.user.name}</strong><br>${data.user.email}</p><p>Age: ${data.user.age}<br>Phone: ${data.user.phone}<br>${data.user.address}</p></div>
-      <div class="account-section-heading"><h4>Order Items</h4><span>${orders.length} order${orders.length === 1 ? "" : "s"}</span></div>
-      ${orders.length ? orders.map(accountOrderTemplate).join("") : "<p class=\"modal-desc\">No orders yet.</p>"}
-      <button type="button" class="auth-switch-btn" id="logoutBtn">Log out</button>`;
-    document.getElementById("logoutBtn").addEventListener("click", async () => {
-      await fetch("/api/auth/logout", { method: "POST", headers: authHeaders() });
-      setCurrentUser("", null);
-      closeModal("accountModal");
-      showToast("You have been logged out.");
-    });
   }
 
   function accountOrderTemplate(order) {
     const items = order.items || [];
-    return `<section class="account-order">
-      <div class="account-order-header"><div><strong>Order #${order.id}</strong><span>${new Date(order.createdAt).toLocaleDateString()}</span></div><span class="order-status">${order.status}</span></div>
+    return `<details class="account-order">
+      <summary class="account-order-header"><div><strong>Order #${order.id}</strong><span>${new Date(order.createdAt).toLocaleDateString()}</span></div><span class="account-order-meta"><span class="order-status">${order.status}</span><span class="account-order-toggle" aria-hidden="true"></span></span></summary>
       <div class="account-order-items">${items.map((item) => { const quantity = Number(item.quantity) || 1; const unitPrice = Number(item.unitPrice) || (Number(item.lineTotal) / quantity); return `<div class="account-order-item"><div class="account-order-image">${productImageMarkup({ id: item.productId, title: item.productTitle, category: item.category || "", image: item.image })}</div><div class="account-order-item-info"><strong>${item.productTitle}</strong><span>${money(unitPrice)} each · Qty ${quantity}</span></div><strong>${money(item.lineTotal || unitPrice * quantity)}</strong></div>`; }).join("")}</div>
       <div class="account-order-summary"><span>Total <strong>${money(order.total)}</strong></span></div>
-    </section>`;
+    </details>`;
   }
 
   init();
