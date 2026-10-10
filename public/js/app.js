@@ -967,7 +967,7 @@
       setCurrentUser(state.authToken, data.user);
       const orders = data.orders || [];
       el.accountContent.innerHTML = `
-        <div class="account-details"><p><strong>${data.user.name}</strong><br>${data.user.email}</p><p>Age: ${data.user.age}<br>Phone: ${data.user.phone}<br>${data.user.address}</p></div>
+        <div class="account-details"><p><strong>${data.user.name}</strong><br>${data.user.email}</p><p>Age: ${data.user.age}<br>Phone: ${data.user.phone}<br>Address: ${data.user.address}</p></div>
         <div class="account-section-heading"><h4>Order Items</h4><span>${orders.length} order${orders.length === 1 ? "" : "s"}</span></div>
         ${orders.length ? orders.map(accountOrderTemplate).join("") : "<p class=\"modal-desc\">No orders yet.</p>"}
         <button type="button" class="auth-switch-btn" id="logoutBtn">Log out</button>`;
