@@ -58,10 +58,14 @@ async function getAuthenticatedUser(req) {
 }
 
 async function requireUser(req, res, next) {
-  const user = await getAuthenticatedUser(req);
-  if (!user) return res.status(401).json({ error: "Please log in to continue." });
-  req.user = user;
-  next();
+  try {
+    const user = await getAuthenticatedUser(req);
+    if (!user) return res.status(401).json({ error: "Please log in to continue." });
+    req.user = user;
+    next();
+  } catch (err) {
+    next(err);
+  }
 }
 
 function hashPassword(password, salt = crypto.randomBytes(16).toString("hex")) {
