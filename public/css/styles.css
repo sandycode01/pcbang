@@ -1012,6 +1012,31 @@ img { max-width: 100%; display: block; }
 
 .modal.open .modal-box { transform: translateY(0); }
 .modal-box.wide { max-width: 620px; }
+.account-modal-box {
+  display: flex;
+  flex-direction: column;
+  height: fit-content;
+  max-height: calc(100vh - 40px);
+  max-height: calc(100dvh - 40px);
+  min-height: 0;
+  overflow: hidden;
+}
+.account-modal-box h3 { flex: 0 0 auto; }
+#accountContent {
+  flex: 1 1 auto;
+  min-height: 0;
+  max-height: calc(100vh - 140px);
+  max-height: calc(100dvh - 140px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding-right: 4px;
+  scrollbar-gutter: stable;
+  scrollbar-width: thin;
+  scrollbar-color: var(--pcb-blue) #edf0f5;
+}
+#accountContent::-webkit-scrollbar { width: 8px; }
+#accountContent::-webkit-scrollbar-track { background: #edf0f5; border-radius: 8px; }
+#accountContent::-webkit-scrollbar-thumb { background: var(--pcb-blue); border-radius: 8px; }
 .storefront-product-modal { max-width: 760px !important; max-height: 90vh; overflow-y: auto; }
 .storefront-detail-main { display: grid; grid-template-columns: minmax(220px, 0.9fr) 1.1fr; gap: 26px; align-items: center; }
 .storefront-detail-image { height: 270px; background: #f6f8fc; border-radius: var(--radius-md); overflow: hidden; display: flex; align-items: center; justify-content: center; }
@@ -1100,9 +1125,14 @@ img { max-width: 100%; display: block; }
 .account-section-heading { display: flex; align-items: baseline; justify-content: space-between; margin: 20px 0 10px; }
 .account-section-heading span { color: var(--pcb-text-light); font-size: 12px; }
 .account-order { border: 1px solid var(--pcb-border); border-radius: var(--radius-md); overflow: hidden; margin-bottom: 12px; background: #fff; }
-.account-order-header { display: flex; justify-content: space-between; align-items: center; padding: 12px 14px; background: #f6f8fc; border-bottom: 1px solid var(--pcb-border); font-size: 13px; }
+.account-order-header { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 12px 14px; background: #f6f8fc; font-size: 13px; cursor: pointer; list-style: none; }
+.account-order[open] .account-order-header { border-bottom: 1px solid var(--pcb-border); }
+.account-order-header::-webkit-details-marker { display: none; }
 .account-order-header div { display: flex; flex-direction: column; gap: 3px; }
 .account-order-header div span { color: var(--pcb-text-light); font-size: 11px; }
+.account-order-meta { display: flex; align-items: center; gap: 12px; }
+.account-order-toggle { width: 8px; height: 8px; border-right: 2px solid var(--pcb-text-light); border-bottom: 2px solid var(--pcb-text-light); transform: rotate(45deg) translateY(-2px); transition: transform 0.2s ease; }
+.account-order[open] .account-order-toggle { transform: rotate(225deg) translate(-2px, -1px); }
 .account-order-items { padding: 4px 14px; }
 .account-order-item { display: flex; align-items: center; gap: 10px; padding: 10px 0; border-bottom: 1px solid #edf0f5; font-size: 12px; }
 .account-order-item:last-child { border-bottom: 0; }
