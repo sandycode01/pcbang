@@ -834,6 +834,17 @@
       document.querySelector(".site-header").classList.toggle("scrolled", window.scrollY > 24);
     }, { passive: true });
 
+    el.flashScroll.addEventListener("wheel", (e) => {
+      if (e.deltaY === 0) return;
+      const maxScrollLeft = el.flashScroll.scrollWidth - el.flashScroll.clientWidth;
+      const canScrollLeft = e.deltaY < 0 && el.flashScroll.scrollLeft > 0;
+      const canScrollRight = e.deltaY > 0 && el.flashScroll.scrollLeft < maxScrollLeft;
+      if (!canScrollLeft && !canScrollRight) return;
+
+      e.preventDefault();
+      el.flashScroll.scrollLeft += e.deltaY;
+    }, { passive: false });
+
     el.searchForm.addEventListener("submit", (e) => {
       e.preventDefault();
       state.showingWishlist = false;
