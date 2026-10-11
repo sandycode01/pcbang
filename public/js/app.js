@@ -910,7 +910,7 @@
       state.searchQuery = "";
       renderFilterPills();
       applyFilters();
-      document.getElementById("justForYou").scrollIntoView({ behavior: "smooth" });
+      scrollFeedHeadingIntoView();
     });
 
     el.loginBtn.addEventListener("click", () => {
