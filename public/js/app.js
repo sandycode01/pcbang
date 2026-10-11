@@ -208,7 +208,6 @@
       a.addEventListener("click", (e) => {
         e.preventDefault();
         setActiveCategory(a.dataset.cat);
-        document.getElementById("justForYou").scrollIntoView({ behavior: "smooth" });
       });
     });
   }
@@ -228,7 +227,6 @@
     el.categoryGrid.querySelectorAll(".category-tile").forEach((btn) => {
       btn.addEventListener("click", () => {
         setActiveCategory(btn.dataset.cat);
-        document.getElementById("justForYou").scrollIntoView({ behavior: "smooth" });
       });
     });
   }
@@ -308,6 +306,16 @@
     applyFilters();
     renderFilterPills();
     toggleCategoryDropdown(false);
+    closeFilterDrawer();
+    scrollFeedHeadingIntoView();
+  }
+
+  function scrollFeedHeadingIntoView() {
+    const header = document.querySelector(".site-header");
+    header.classList.add("scrolled");
+    const headingTop = el.feedHeading.getBoundingClientRect().top + window.scrollY;
+    const top = Math.max(0, headingTop - header.getBoundingClientRect().height - 16);
+    window.scrollTo({ top, behavior: "smooth" });
   }
 
   function applyFilters() {
@@ -341,6 +349,10 @@
     } else if (state.searchQuery) {
       el.feedHeading.textContent = `Search results for "${state.searchQuery}"`;
       el.feedSubtitle.textContent = `${list.length} item(s) found${getPriceFilterDescription()}`;
+    } else if (state.activeCategory !== "all") {
+      const category = state.categories.find((item) => item.id === state.activeCategory);
+      el.feedHeading.textContent = category ? category.name : "Products";
+      el.feedSubtitle.textContent = `${list.length} item(s)${getPriceFilterDescription()}`;
     } else {
       el.feedHeading.textContent = "Just For You";
       el.feedSubtitle.textContent = `Based on your recent views, cart, searches, and category preferences${getPriceFilterDescription()}`;
@@ -997,7 +1009,7 @@
     el.filterDrawerBackdrop.classList.remove("open");
     el.filterDrawer.setAttribute("aria-hidden", "true");
     el.openFilterDrawer.setAttribute("aria-expanded", "false");
-    if (wasOpen) el.openFilterDrawer.focus();
+    if (wasOpen) el.openFilterDrawer.focus({ preventScroll: true });
   }
 
   function closeAllModals() {
