@@ -16,6 +16,8 @@ category preferences, and recent searches remain browser-local.
   scrollable deals feed (discount %, price, stock meter)
 - Category grid and navigation (Processors, Graphics Cards, Motherboards, RAM,
   Storage, PSUs, Cases, Cooling, Peripherals, Laptops)
+- Slide-out storefront filters with category selection and minimum/maximum price
+  ranges; filters can be combined to narrow the product feed
 - Personalized "Just For You" product feed showing up to 15 ranked products
   based on cart items, recently viewed items, previous searches, and category
   preferences; includes category filter pills, ratings, sold counts, and stock
@@ -36,8 +38,13 @@ category preferences, and recent searches remain browser-local.
 - Overview: total products, mock total sales, active categories, low-stock alerts
 - Product Management: full CRUD table (add / edit / delete) with a form for
   title, category, price, discount price, stock, rating, specs, and icon
+- Customer Orders: newest-first order list with order number, customer, delivery
+  destination, contact number, payment method, total, status, and date ordered
 - Flash Sale Management: one-click toggle switches to add/remove any product
   from the storefront's Flash Sale banner
+- Admin data tables have a viewport-limited height and independent scrolling;
+  column headers remain visible while scrolling, and the height limit adjusts
+  for smaller screens
 
 ## Getting Started
 
@@ -150,7 +157,7 @@ pcbang/
     └── js/
         ├── icons.js           # Shared inline-SVG icon set
         ├── app.js             # Storefront logic (accounts, cart, search, checkout…)
-        └── admin.js           # Admin logic (auth, CRUD, stats)
+        └── admin.js           # Admin logic (auth, products, orders, stats)
 ```
 
 ## API Reference
