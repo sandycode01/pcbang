@@ -8,6 +8,7 @@
     token: sessionStorage.getItem("pcbang_admin_token") || null,
     categories: [],
     products: [],
+    orders: [],
     editingId: null,
     deletingId: null
   };
@@ -27,6 +28,8 @@
     lowStockTable: document.querySelector("#lowStockTable tbody"),
 
     productsTable: document.querySelector("#productsTable tbody"),
+    ordersTable: document.querySelector("#ordersTable tbody"),
+    ordersBadge: document.getElementById("ordersBadge"),
     flashSaleTable: document.querySelector("#flashSaleTable tbody"),
     openAddProductBtn: document.getElementById("openAddProductBtn"),
     categoryFilters: document.querySelectorAll(".category-filter"),
@@ -145,18 +148,21 @@
   // Bootstrap dashboard data
   async function bootstrapDashboard() {
     try {
-      const [categories, products] = await Promise.all([
+      const [categories, products, orders] = await Promise.all([
         fetch("/api/categories").then((r) => r.json()),
-        api("/api/admin/products")
+        api("/api/admin/products"),
+        api("/api/admin/orders")
       ]);
       state.categories = categories;
       state.products = products;
+      state.orders = orders;
 
       populateCategorySelect();
       populateProductCategoryFilter();
       renderStats();
       renderLowStockTable();
       renderProductsTable();
+      renderOrdersTable();
       renderFlashSaleTable();
     } catch (err) {
       showToast(err.message);
@@ -302,6 +308,49 @@
 
     el.productsTable.querySelectorAll("[data-action='edit']").forEach((b) => b.addEventListener("click", () => openProductModal(b.dataset.id)));
     el.productsTable.querySelectorAll("[data-action='delete']").forEach((b) => b.addEventListener("click", () => openDeleteModal(b.dataset.id)));
+  }
+
+  function escapeHtml(value) {
+    return String(value ?? "").replace(/[&<>"']/g, (character) => ({
+      "&": "&amp;",
+      "<": "&lt;",
+      ">": "&gt;",
+      "\"": "&quot;",
+      "'": "&#39;"
+    })[character]);
+  }
+
+  function renderOrdersTable() {
+    el.ordersBadge.textContent = state.orders.length;
+    if (state.orders.length === 0) {
+      el.ordersTable.innerHTML = `<tr class="empty-row"><td colspan="8">No customer orders yet.</td></tr>`;
+      return;
+    }
+
+    el.ordersTable.innerHTML = state.orders.map((order) => {
+      const status = String(order.status || "pending").toLowerCase();
+      const statusClass = {
+        pending: "orange",
+        paid: "green",
+        processing: "blue",
+        shipped: "blue",
+        completed: "green",
+        cancelled: "red"
+      }[status] || "gray";
+      const date = new Date(order.createdAt);
+      const orderedAt = Number.isNaN(date.getTime()) ? "—" : date.toLocaleString();
+
+      return `<tr>
+        <td class="order-number">#${escapeHtml(order.id)}</td>
+        <td>${escapeHtml(order.customerName)}</td>
+        <td class="order-destination">${escapeHtml(order.deliveryAddress)}</td>
+        <td>${escapeHtml(order.phone)}</td>
+        <td>${escapeHtml(order.paymentMethod)}</td>
+        <td>${money(order.total)}</td>
+        <td><span class="pill ${statusClass}">${escapeHtml(status)}</span></td>
+        <td>${escapeHtml(orderedAt)}</td>
+      </tr>`;
+    }).join("");
   }
 
   function adminProductImage(product) {

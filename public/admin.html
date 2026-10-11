@@ -54,6 +54,10 @@
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 8l-9-5-9 5 9 5 9-5z"/><path d="M3 8v8l9 5 9-5V8"/><path d="M12 13v8"/></svg>
         Products
       </button>
+      <button class="admin-nav-item" data-view="orders">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3h2l2.4 12.2a2 2 0 0 0 2 1.6h8.8a2 2 0 0 0 2-1.6L22 8H6"/><circle cx="10" cy="21" r="1"/><circle cx="19" cy="21" r="1"/></svg>
+        Orders
+      </button>
       <button class="admin-nav-item" data-view="flashsale">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
         Flash Sale
@@ -130,6 +134,37 @@
         <div class="admin-table-wrap">
           <table class="admin-table" id="productsTable">
             <thead><tr><th>Product</th><th>Category</th><th>Price</th><th>Discount</th><th>Stock</th><th>Flash Sale</th><th>Actions</th></tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ORDERS VIEW -->
+    <section class="admin-view hidden" id="view-orders">
+      <div class="admin-view-header">
+        <h1>Customer Orders</h1>
+        <p>Review customer details and order status.</p>
+      </div>
+      <div class="admin-panel">
+        <div class="admin-panel-header">
+          <h3>All Orders</h3>
+          <span class="badge-count" id="ordersBadge">0</span>
+        </div>
+        <div class="admin-table-wrap">
+          <table class="admin-table orders-table" id="ordersTable">
+            <thead>
+              <tr>
+                <th>Order Number</th>
+                <th>Customer Name</th>
+                <th>Delivery Destination</th>
+                <th>Contact Number</th>
+                <th>Payment Method</th>
+                <th>Total</th>
+                <th>Status</th>
+                <th>Date Ordered</th>
+              </tr>
+            </thead>
             <tbody></tbody>
           </table>
         </div>

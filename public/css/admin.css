@@ -257,6 +257,11 @@ body { background: var(--pcb-bg); }
 
 .admin-table-wrap { overflow-x: auto; }
 .admin-table { width: 100%; border-collapse: collapse; min-width: 640px; }
+.orders-table { min-width: 1120px; }
+.orders-table .order-number { font-weight: 800; color: var(--pcb-navy); white-space: nowrap; }
+.orders-table .order-destination { min-width: 220px; max-width: 320px; white-space: normal; overflow-wrap: anywhere; }
+.orders-table td { white-space: nowrap; }
+.orders-table .order-destination { white-space: normal; }
 .admin-table th {
   text-align: left;
   font-size: 11.5px;

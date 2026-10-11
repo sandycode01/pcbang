@@ -257,6 +257,18 @@ app.get("/api/admin/products", requireAdmin, async (req, res, next) => {
   } catch (err) { next(err); }
 });
 
+// GET all customer orders for the admin dashboard.
+app.get("/api/admin/orders", requireAdmin, async (req, res, next) => {
+  try {
+    const [rows] = await pool.query(`
+      SELECT id, customer_name AS customerName, delivery_address AS deliveryAddress,
+             phone, payment_method AS paymentMethod, total, status, created_at AS createdAt
+      FROM orders
+      ORDER BY created_at DESC, id DESC`);
+    res.json(rows);
+  } catch (err) { next(err); }
+});
+
 // POST create product
 app.post("/api/admin/products", requireAdmin, async (req, res, next) => {
   const body = req.body || {};

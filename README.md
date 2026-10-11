@@ -170,6 +170,7 @@ pcbang/
 - `POST /api/admin/login` — `{ username, password }` → `{ token }`
 - `GET /api/admin/stats`
 - `GET /api/admin/products`
+- `GET /api/admin/orders` — customer and order summary, newest first
 - `POST /api/admin/products`
 - `PUT /api/admin/products/:id`
 - `DELETE /api/admin/products/:id`
