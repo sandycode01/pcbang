@@ -1401,8 +1401,8 @@ img { max-width: 100%; display: block; }
   border: none;
   background: none;
   color: var(--pcb-blue);
-  font-size: 13px;
-  font-weight: 700;
+  font-size: 14px;
+  font-weight: 750;
 }
 
 .auth-switch-btn:hover { text-decoration: underline; }
