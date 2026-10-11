@@ -255,7 +255,12 @@ body { background: var(--pcb-bg); }
   border-radius: 20px;
 }
 
-.admin-table-wrap { overflow-x: auto; }
+.admin-table-wrap {
+  max-height: min(60vh, 560px);
+  overflow: auto;
+  overscroll-behavior: contain;
+  scrollbar-gutter: stable;
+}
 .admin-table { width: 100%; border-collapse: collapse; min-width: 640px; }
 .orders-table { min-width: 1120px; }
 .orders-table .order-number { font-weight: 800; color: var(--pcb-navy); white-space: nowrap; }
@@ -263,6 +268,9 @@ body { background: var(--pcb-bg); }
 .orders-table td { white-space: nowrap; }
 .orders-table .order-destination { white-space: normal; }
 .admin-table th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
   text-align: left;
   font-size: 11.5px;
   text-transform: uppercase;
@@ -435,6 +443,7 @@ body { background: var(--pcb-bg); }
   .admin-nav { flex-direction: row; flex: none; }
   .admin-sidebar-storefront, .admin-logout-btn { width: auto; }
   .admin-main { padding: 20px 16px 50px; }
+  .admin-table-wrap { max-height: 55vh; }
   .stats-grid { grid-template-columns: 1fr 1fr; }
   .product-detail-layout, .product-detail-columns { grid-template-columns: 1fr; gap: 14px; }
   .product-detail-image { height: 190px; }
