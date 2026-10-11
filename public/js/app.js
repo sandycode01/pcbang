@@ -13,6 +13,8 @@
     activeCategory: "all",
     searchQuery: "",
     showingWishlist: false,
+    minPrice: null,
+    maxPrice: null,
     cart: loadFromStorage("pcbang_cart", []),
     wishlist: loadFromStorage("pcbang_wishlist", []),
     recentlyViewed: loadFromStorage("pcbang_recently_viewed", []),
@@ -82,6 +84,17 @@
     feedSubtitle: document.getElementById("feedSubtitle"),
     searchForm: document.getElementById("searchForm"),
     searchInput: document.getElementById("searchInput"),
+    priceFilterForm: document.getElementById("priceFilterForm"),
+    minPrice: document.getElementById("minPrice"),
+    maxPrice: document.getElementById("maxPrice"),
+    clearPriceFilter: document.getElementById("clearPriceFilter"),
+    openFilterDrawer: document.getElementById("openFilterDrawer"),
+    filterDrawer: document.getElementById("filterDrawer"),
+    filterDrawerBackdrop: document.getElementById("filterDrawerBackdrop"),
+    closeFilterDrawer: document.getElementById("closeFilterDrawer"),
+    applyFilterDrawer: document.getElementById("applyFilterDrawer"),
+    categoryFilterToggle: document.getElementById("categoryFilterToggle"),
+    selectedCategoryLabel: document.getElementById("selectedCategoryLabel"),
     cartBtn: document.getElementById("cartBtn"),
     cartCount: document.getElementById("cartCount"),
     wishlistBtn: document.getElementById("wishlistBtn"),
@@ -263,42 +276,45 @@
       </div>`;
   }
 
-  // Rendering: filter pills + product grid ("Just For You")
+  // Rendering: drawer category choices + product grid ("Just For You")
   function renderFilterPills() {
     const pills = [{ id: "all", name: "All" }, ...state.categories];
+    const selectedCategory = pills.find((category) => category.id === state.activeCategory);
+    el.selectedCategoryLabel.textContent = selectedCategory ? selectedCategory.name : "All categories";
     el.filterPills.innerHTML = pills
       .map(
         (c) =>
-          `<button class="filter-pill ${c.id === state.activeCategory ? "active" : ""}" data-cat="${c.id}">${c.name}</button>`
+          `<button class="drawer-category-choice ${c.id === state.activeCategory ? "active" : ""}" data-cat="${c.id}" type="button" aria-pressed="${c.id === state.activeCategory}">${c.name}</button>`
       )
       .join("");
 
-    el.filterPills.querySelectorAll(".filter-pill").forEach((btn) => {
+    el.filterPills.querySelectorAll(".drawer-category-choice").forEach((btn) => {
       btn.addEventListener("click", () => setActiveCategory(btn.dataset.cat));
     });
+  }
+
+  function toggleCategoryDropdown(forceOpen) {
+    const isOpen = forceOpen ?? el.categoryFilterToggle.getAttribute("aria-expanded") !== "true";
+    el.categoryFilterToggle.setAttribute("aria-expanded", String(isOpen));
+    el.filterPills.classList.toggle("hidden", !isOpen);
   }
 
   function setActiveCategory(catId) {
     state.showingWishlist = false;
     state.activeCategory = catId;
     state.searchQuery = "";
-      rememberPreference(catId === "all" ? null : catId);
+    rememberPreference(catId === "all" ? null : catId);
     el.searchInput.value = "";
     applyFilters();
     renderFilterPills();
+    toggleCategoryDropdown(false);
   }
 
   function applyFilters() {
-    if (state.showingWishlist) {
-      state.filteredProducts = state.allProducts.filter((p) => state.wishlist.includes(p.id));
-      el.feedHeading.textContent = "My Wishlist";
-      el.feedSubtitle.textContent = `${state.filteredProducts.length} saved item(s)`;
-      renderProductGrid();
-      return;
-    }
-
     let list;
-    if (state.activeCategory !== "all") {
+    if (state.showingWishlist) {
+      list = state.allProducts.filter((p) => state.wishlist.includes(p.id));
+    } else if (state.activeCategory !== "all") {
       list = state.allProducts.filter((p) => p.category === state.activeCategory);
     } else if (state.searchQuery) {
       const q = state.searchQuery.toLowerCase();
@@ -311,17 +327,33 @@
     } else {
       list = personalizedProducts();
     }
+
+    list = list.filter((product) => {
+      const price = Number(product.discountPrice) || Number(product.price);
+      return (state.minPrice === null || price >= state.minPrice) &&
+        (state.maxPrice === null || price <= state.maxPrice);
+    });
     state.filteredProducts = list;
 
-    if (state.searchQuery) {
+    if (state.showingWishlist) {
+      el.feedHeading.textContent = "My Wishlist";
+      el.feedSubtitle.textContent = `${list.length} saved item(s)${getPriceFilterDescription()}`;
+    } else if (state.searchQuery) {
       el.feedHeading.textContent = `Search results for "${state.searchQuery}"`;
-      el.feedSubtitle.textContent = `${list.length} item(s) found`;
+      el.feedSubtitle.textContent = `${list.length} item(s) found${getPriceFilterDescription()}`;
     } else {
       el.feedHeading.textContent = "Just For You";
-      el.feedSubtitle.textContent = "Based on your recent views, cart, searches, and category preferences";
+      el.feedSubtitle.textContent = `Based on your recent views, cart, searches, and category preferences${getPriceFilterDescription()}`;
     }
 
     renderProductGrid();
+  }
+
+  function getPriceFilterDescription() {
+    if (state.minPrice === null && state.maxPrice === null) return "";
+    const min = state.minPrice === null ? "any" : money(state.minPrice);
+    const max = state.maxPrice === null ? "any" : money(state.maxPrice);
+    return ` · Price: ${min}–${max}`;
   }
 
   function personalizedProducts() {
@@ -810,6 +842,45 @@
       }
     });
 
+    el.priceFilterForm.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const minValue = el.minPrice.value.trim();
+      const maxValue = el.maxPrice.value.trim();
+      const minPrice = minValue === "" ? null : Number(minValue);
+      const maxPrice = maxValue === "" ? null : Number(maxValue);
+
+      el.maxPrice.setCustomValidity(
+        minPrice !== null && maxPrice !== null && minPrice > maxPrice
+          ? "Maximum price must be greater than or equal to minimum price."
+          : ""
+      );
+      if (!el.priceFilterForm.reportValidity()) return;
+
+      state.minPrice = minPrice;
+      state.maxPrice = maxPrice;
+      applyFilters();
+    });
+    el.maxPrice.addEventListener("input", () => el.maxPrice.setCustomValidity(""));
+    el.minPrice.addEventListener("input", () => el.maxPrice.setCustomValidity(""));
+    el.clearPriceFilter.addEventListener("click", () => {
+      el.priceFilterForm.reset();
+      el.maxPrice.setCustomValidity("");
+      state.minPrice = null;
+      state.maxPrice = null;
+      state.activeCategory = "all";
+      state.showingWishlist = false;
+      state.searchQuery = "";
+      el.searchInput.value = "";
+      renderFilterPills();
+      applyFilters();
+    });
+
+    el.openFilterDrawer.addEventListener("click", openFilterDrawer);
+    el.closeFilterDrawer.addEventListener("click", closeFilterDrawer);
+    el.filterDrawerBackdrop.addEventListener("click", closeFilterDrawer);
+    el.applyFilterDrawer.addEventListener("click", closeFilterDrawer);
+    el.categoryFilterToggle.addEventListener("click", () => toggleCategoryDropdown());
+
     el.cartBtn.addEventListener("click", openCart);
     el.closeCartBtn.addEventListener("click", closeCart);
     el.overlay.addEventListener("click", () => {
@@ -821,13 +892,12 @@
     el.checkoutForm.addEventListener("submit", handleCheckoutSubmit);
 
     el.wishlistBtn.addEventListener("click", () => {
+      closeFilterDrawer();
       state.showingWishlist = true;
       state.activeCategory = "all";
       state.searchQuery = "";
-      state.filteredProducts = state.allProducts.filter((p) => state.wishlist.includes(p.id));
-      el.feedHeading.textContent = "My Wishlist";
-      el.feedSubtitle.textContent = `${state.filteredProducts.length} saved item(s)`;
-      renderProductGrid();
+      renderFilterPills();
+      applyFilters();
       document.getElementById("justForYou").scrollIntoView({ behavior: "smooth" });
     });
 
@@ -905,11 +975,29 @@
 
     document.addEventListener("keydown", (e) => {
       if (e.key === "Escape") {
+        closeFilterDrawer();
         closeCart();
         resetAuthModal();
         closeAllModals();
       }
     });
+  }
+
+  function openFilterDrawer() {
+    el.filterDrawer.classList.add("open");
+    el.filterDrawerBackdrop.classList.add("open");
+    el.filterDrawer.setAttribute("aria-hidden", "false");
+    el.openFilterDrawer.setAttribute("aria-expanded", "true");
+    el.closeFilterDrawer.focus();
+  }
+
+  function closeFilterDrawer() {
+    const wasOpen = el.filterDrawer.classList.contains("open");
+    el.filterDrawer.classList.remove("open");
+    el.filterDrawerBackdrop.classList.remove("open");
+    el.filterDrawer.setAttribute("aria-hidden", "true");
+    el.openFilterDrawer.setAttribute("aria-expanded", "false");
+    if (wasOpen) el.openFilterDrawer.focus();
   }
 
   function closeAllModals() {

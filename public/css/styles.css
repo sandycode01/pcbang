@@ -499,9 +499,220 @@ img { max-width: 100%; display: block; }
 /* PRODUCT GRID / CARDS ("Just For You") */
 .product-grid {
   display: grid;
-  grid-template-columns: repeat(5, 1fr);
+  grid-template-columns: repeat(5, minmax(0, 1fr));
   gap: 16px;
 }
+
+.open-filter-drawer {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+  padding: 9px 14px;
+  color: var(--pcb-navy);
+  background: #fff;
+  border: 1px solid var(--pcb-border);
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.open-filter-drawer:hover { color: var(--pcb-blue); border-color: var(--pcb-blue); }
+.open-filter-drawer svg { width: 17px; height: 17px; }
+
+.filter-drawer-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 1090;
+  background: rgba(7, 20, 39, 0.48);
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.25s ease, visibility 0.25s ease;
+}
+
+.filter-drawer-backdrop.open { opacity: 1; visibility: visible; }
+
+.filter-drawer {
+  position: fixed;
+  inset: 0 auto 0 0;
+  z-index: 1091;
+  display: flex;
+  flex-direction: column;
+  width: min(360px, 90vw);
+  height: 100vh;
+  height: 100dvh;
+  background: #fff;
+  box-shadow: var(--shadow-lg);
+  transform: translateX(-105%);
+  transition: transform 0.25s ease;
+  visibility: hidden;
+}
+
+.filter-drawer.open { transform: translateX(0); visibility: visible; }
+
+.filter-drawer-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 20px;
+  border-bottom: 1px solid var(--pcb-border);
+}
+
+.filter-drawer-header h2 {
+  margin: 0;
+  color: var(--pcb-navy);
+  font-size: 18px;
+}
+
+.filter-drawer-close {
+  display: grid;
+  width: 36px;
+  height: 36px;
+  place-items: center;
+  color: var(--pcb-text-light);
+  background: #fff;
+  border: 1px solid var(--pcb-border);
+  border-radius: 50%;
+}
+
+.filter-drawer-close svg { width: 18px; height: 18px; }
+
+.filter-drawer-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 8px 20px 20px;
+}
+
+.drawer-filter-section {
+  padding: 16px 0;
+  border-bottom: 1px solid var(--pcb-border);
+}
+
+.drawer-filter-section h3 {
+  margin: 0 0 12px;
+  color: var(--pcb-navy);
+  font-size: 14px;
+}
+
+.drawer-category-toggle {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 11px 12px;
+  color: var(--pcb-text);
+  background: #fff;
+  border: 1px solid var(--pcb-border);
+  border-radius: var(--radius-sm);
+  text-align: left;
+  font-size: 13px;
+}
+
+.drawer-category-toggle:hover,
+.drawer-category-toggle[aria-expanded="true"] { border-color: var(--pcb-blue); }
+.drawer-category-toggle svg { width: 17px; height: 17px; transition: transform 0.2s ease; }
+.drawer-category-toggle[aria-expanded="true"] svg { transform: rotate(180deg); }
+
+.drawer-category-list {
+  display: grid;
+  max-height: 202px;
+  gap: 2px;
+  margin-top: 6px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  scrollbar-color: var(--pcb-blue) #edf0f5;
+}
+
+.drawer-category-list::-webkit-scrollbar { width: 7px; }
+.drawer-category-list::-webkit-scrollbar-track { background: #edf0f5; border-radius: 7px; }
+.drawer-category-list::-webkit-scrollbar-thumb { background: var(--pcb-blue); border-radius: 7px; }
+
+.drawer-category-choice {
+  width: 100%;
+  min-height: 38px;
+  padding: 8px 12px;
+  text-align: left;
+  color: var(--pcb-text);
+  background: #fff;
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+}
+
+.drawer-category-choice:hover { background: #f3f6fb; }
+.drawer-category-choice.active {
+  color: var(--pcb-blue);
+  background: #eef4ff;
+  border-color: #cbdcff;
+  font-weight: 700;
+}
+
+.filter-drawer-footer {
+  display: grid;
+  grid-template-columns: 1fr 1.5fr;
+  gap: 10px;
+  padding: 16px 20px;
+  border-top: 1px solid var(--pcb-border);
+  background: #fff;
+}
+
+.price-filter-fields {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.price-filter-fields label {
+  display: grid;
+  gap: 6px;
+  color: var(--pcb-text-light);
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.price-filter-fields input {
+  width: 100%;
+  min-width: 0;
+  padding: 9px 7px;
+  border: 1px solid var(--pcb-border);
+  border-radius: var(--radius-sm);
+  color: var(--pcb-text);
+  font: inherit;
+  font-size: 12px;
+}
+
+.price-filter-fields input:focus {
+  outline: 2px solid var(--pcb-blue-light);
+  outline-offset: 1px;
+}
+
+.price-filter-apply,
+.price-filter-clear {
+  width: 100%;
+  margin-top: 10px;
+  padding: 9px 12px;
+  border-radius: var(--radius-sm);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.price-filter-apply {
+  color: #fff;
+  background: var(--pcb-navy);
+  border: 1px solid var(--pcb-navy);
+}
+
+.price-filter-apply:hover { background: var(--pcb-blue); border-color: var(--pcb-blue); }
+
+.price-filter-clear {
+  color: var(--pcb-text-light);
+  background: #fff;
+  border: 1px solid var(--pcb-border);
+}
+
+.price-filter-clear:hover { color: var(--pcb-blue); border-color: var(--pcb-blue); }
 
 .product-card {
   background: var(--pcb-white);
@@ -1253,7 +1464,7 @@ img { max-width: 100%; display: block; }
 /* RESPONSIVE */
 @media (max-width: 1080px) {
   .category-grid { grid-template-columns: repeat(5, 1fr); }
-  .product-grid { grid-template-columns: repeat(4, 1fr); }
+  .product-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
   .footer-columns { grid-template-columns: repeat(2, 1fr); }
 }
 
@@ -1263,7 +1474,7 @@ img { max-width: 100%; display: block; }
   .logo { order: 1; }
   .header-actions { order: 2; margin-left: auto; }
   .search-form { order: 3; max-width: 100%; width: 100%; }
-  .product-grid { grid-template-columns: repeat(3, 1fr); }
+  .product-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
   .category-grid { grid-template-columns: repeat(4, 1fr); }
   .promo-strip { grid-template-columns: 1fr; }
   .flash-sale-header { flex-direction: column; align-items: flex-start; }
@@ -1271,7 +1482,7 @@ img { max-width: 100%; display: block; }
 
 @media (max-width: 600px) {
   .header-action span.action-label { display: none; }
-  .product-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+  .product-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
   .category-grid { grid-template-columns: repeat(3, 1fr); padding: 16px; gap: 6px; }
   .category-tile .cat-icon-circle { width: 46px; height: 46px; }
   .footer-columns { grid-template-columns: 1fr 1fr; padding: 30px 0 20px; }

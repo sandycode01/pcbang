@@ -136,18 +136,58 @@
         <h2 id="feedHeading">Just For You</h2>
         <p class="subtitle" id="feedSubtitle">Handpicked PC parts based on what's trending</p>
       </div>
+      <button class="open-filter-drawer" id="openFilterDrawer" type="button" aria-controls="filterDrawer" aria-expanded="false">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" y1="6" x2="20" y2="6"/><line x1="7" y1="12" x2="17" y2="12"/><line x1="10" y1="18" x2="14" y2="18"/></svg>
+        Filters
+      </button>
     </div>
 
-    <div class="filter-pills" id="filterPills">
-      <!-- populated by JS -->
-    </div>
-
-    <div class="product-grid" id="productGrid">
-      <!-- populated by JS -->
+    <div class="catalog-layout">
+      <div class="product-grid" id="productGrid">
+        <!-- populated by JS -->
+      </div>
     </div>
   </section>
 
 </main>
+
+<div class="filter-drawer-backdrop" id="filterDrawerBackdrop"></div>
+<aside class="filter-drawer" id="filterDrawer" role="dialog" aria-modal="true" aria-labelledby="filterDrawerTitle" aria-hidden="true">
+  <div class="filter-drawer-header">
+    <h2 id="filterDrawerTitle">Filters</h2>
+    <button class="filter-drawer-close" id="closeFilterDrawer" type="button" aria-label="Close filters">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </button>
+  </div>
+  <div class="filter-drawer-content">
+    <section class="drawer-filter-section" aria-labelledby="categoryFilterHeading">
+      <h3 id="categoryFilterHeading">Category</h3>
+      <button class="drawer-category-toggle" id="categoryFilterToggle" type="button" aria-controls="filterPills" aria-expanded="false">
+        <span id="selectedCategoryLabel">All categories</span>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+      </button>
+      <div class="drawer-category-list hidden" id="filterPills"></div>
+    </section>
+    <section class="drawer-filter-section" aria-labelledby="priceFilterHeading">
+      <h3 id="priceFilterHeading">Price range</h3>
+      <form id="priceFilterForm">
+        <div class="price-filter-fields">
+          <label for="minPrice">Min (₱)
+            <input id="minPrice" name="minPrice" type="number" min="0" step="1" inputmode="numeric" placeholder="No min" />
+          </label>
+          <label for="maxPrice">Max (₱)
+            <input id="maxPrice" name="maxPrice" type="number" min="0" step="1" inputmode="numeric" placeholder="No max" />
+          </label>
+        </div>
+        <button class="price-filter-apply" type="submit">Apply price</button>
+      </form>
+    </section>
+  </div>
+  <div class="filter-drawer-footer">
+    <button class="price-filter-clear" id="clearPriceFilter" type="button">Clear all</button>
+    <button class="price-filter-apply" id="applyFilterDrawer" type="button">Show products</button>
+  </div>
+</aside>
 
 <!-- FOOTER -->
 <footer class="site-footer">
