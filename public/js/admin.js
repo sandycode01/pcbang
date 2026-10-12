@@ -56,7 +56,6 @@
     pfImageHelp: document.getElementById("pfImageHelp"),
     pfRating: document.getElementById("pfRating"),
     pfSpecs: document.getElementById("pfSpecs"),
-    pfFlashSale: document.getElementById("pfFlashSale"),
 
     deleteModal: document.getElementById("deleteModal"),
     deleteModalDesc: document.getElementById("deleteModalDesc"),
@@ -586,8 +585,6 @@
       : "Choose an image from your computer. Existing image stays when no new file is selected.";
     el.pfRating.value = product ? product.rating : 4.5;
     el.pfSpecs.value = product ? product.specs : "";
-    el.pfFlashSale.checked = product ? !!product.flashSale : false;
-
     openModal("productModal");
   }
 
@@ -602,8 +599,7 @@
       discountPrice: el.pfDiscountPrice.value ? Number(el.pfDiscountPrice.value) : null,
       image: el.pfImage.value,
       rating: el.pfRating.value ? Number(el.pfRating.value) : 4.5,
-      specs: el.pfSpecs.value.trim(),
-      flashSale: el.pfFlashSale.checked
+      specs: el.pfSpecs.value.trim()
     };
 
     try {
