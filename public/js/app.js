@@ -9,7 +9,6 @@
   const state = {
     categories: [],
     allProducts: [],
-    pcBuilderProducts: [],
     filteredProducts: [],
     activeCategory: "all",
     searchQuery: "",
@@ -89,14 +88,6 @@
   const el = {
     categoryNavStrip: document.getElementById("categoryNavStrip"),
     categoryGrid: document.getElementById("categoryGrid"),
-    builderCpu: document.getElementById("builderCpu"),
-    builderMotherboard: document.getElementById("builderMotherboard"),
-    builderRam: document.getElementById("builderRam"),
-    builderGpu: document.getElementById("builderGpu"),
-    builderCase: document.getElementById("builderCase"),
-    checkPcCompatibility: document.getElementById("checkPcCompatibility"),
-    resetPcBuilder: document.getElementById("resetPcBuilder"),
-    pcBuilderResults: document.getElementById("pcBuilderResults"),
     flashScroll: document.getElementById("flashScroll"),
     filterPills: document.getElementById("filterPills"),
     productGrid: document.getElementById("productGrid"),
@@ -162,6 +153,12 @@
       state.categories = await catRes.json();
       state.allProducts = await prodRes.json();
       state.flashSaleEndsAt = (await saleRes.json()).endsAt;
+      const params = new URLSearchParams(window.location.search);
+      const requestedCategory = params.get("category");
+      state.activeCategory = state.categories.some((category) => category.id === requestedCategory)
+        ? requestedCategory : "all";
+      state.searchQuery = params.get("search") || "";
+      el.searchInput.value = state.searchQuery;
       syncWishlistWithProducts();
 
       renderCategoryNav();
@@ -170,142 +167,11 @@
       renderFilterPills();
       applyFilters();
       startProductRefresh();
-      try {
-        const builderResponse = await fetch("/api/pc-builder/products");
-        if (!builderResponse.ok) throw new Error("Couldn't load PC Builder products.");
-        state.pcBuilderProducts = await builderResponse.json();
-        populatePcBuilderOptions();
-      } catch (builderError) {
-        console.error("Failed to load PC Builder products:", builderError);
-        for (const select of [el.builderCpu, el.builderMotherboard, el.builderRam, el.builderGpu, el.builderCase]) {
-          select.disabled = true;
-        }
-        el.checkPcCompatibility.disabled = true;
-        renderPcBuilderMessage("The compatibility checker couldn't load its product list. Refresh the page to try again.", "error");
-      }
     } catch (err) {
       console.error("Failed to load storefront data:", err);
       el.productGrid.innerHTML = `<div class="empty-state">Couldn't load products. Please make sure the server is running.</div>`;
     }
   }
-
-  function populatePcBuilderOptions() {
-    const selects = [
-      [el.builderCpu, "cpu", "Choose a processor"],
-      [el.builderMotherboard, "mobo", "Choose a motherboard"],
-      [el.builderRam, "ram", "Choose memory"],
-      [el.builderGpu, "gpu", "Choose a graphics card"],
-      [el.builderCase, "case", "Choose a PC case"]
-    ];
-    for (const [select, category, placeholder] of selects) {
-      const options = state.pcBuilderProducts
-        .filter((product) => product.category === category)
-        .map((product) => {
-          const option = document.createElement("option");
-          option.value = product.id;
-          option.textContent = `${product.title} — ${product.stock > 0 ? `${product.stock} in stock` : "Out of stock"}`;
-          option.disabled = Number(product.stock) <= 0;
-          return option;
-        });
-      select.replaceChildren(new Option(placeholder, ""), ...options);
-      select.addEventListener("change", () => {
-        if (getPcBuilderSelections().filter(Boolean).length >= 2) checkPcBuilderCompatibility();
-      });
-    }
-  }
-
-  function getPcBuilderSelections() {
-    return [
-      el.builderCpu.value,
-      el.builderMotherboard.value,
-      el.builderRam.value,
-      el.builderGpu.value,
-      el.builderCase.value
-    ];
-  }
-
-  function renderPcBuilderMessage(message, status = "empty") {
-    el.pcBuilderResults.replaceChildren();
-    const result = document.createElement("div");
-    result.className = `pc-builder-summary ${status}`;
-    result.textContent = message;
-    el.pcBuilderResults.append(result);
-  }
-
-  async function checkPcBuilderCompatibility() {
-    const selections = {
-      cpuId: el.builderCpu.value,
-      motherboardId: el.builderMotherboard.value,
-      ramId: el.builderRam.value,
-      gpuId: el.builderGpu.value,
-      caseId: el.builderCase.value
-    };
-    if (!Object.values(selections).some(Boolean)) {
-      renderPcBuilderMessage("Select at least two components to run a compatibility check.");
-      return;
-    }
-
-    const requestId = (state.compatibilityRequestId || 0) + 1;
-    state.compatibilityRequestId = requestId;
-    el.checkPcCompatibility.disabled = true;
-    try {
-      const response = await fetch("/api/pc-builder/check", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(selections)
-      });
-      const result = await response.json();
-      if (!response.ok) throw new Error(result.error || "Compatibility check failed.");
-      if (requestId !== state.compatibilityRequestId) return;
-
-      el.pcBuilderResults.replaceChildren();
-      const summary = document.createElement("div");
-      summary.className = `pc-builder-summary ${result.overall}`;
-      summary.textContent = result.overall === "compatible"
-        ? "Selected components pass the available compatibility checks."
-        : result.overall === "incompatible"
-          ? "At least one selected component combination is incompatible."
-          : "Some checks are incomplete. Select the remaining parts and verify any missing specifications.";
-      el.pcBuilderResults.append(summary);
-
-      if (!result.checks.length) {
-        const hint = document.createElement("p");
-        hint.className = "pc-builder-empty";
-        hint.textContent = "Select at least two components to check their compatibility.";
-        el.pcBuilderResults.append(hint);
-        return;
-      }
-      const list = document.createElement("ul");
-      list.className = "pc-builder-check-list";
-      for (const check of result.checks) {
-        const item = document.createElement("li");
-        item.className = `pc-builder-check ${check.status}`;
-        const title = document.createElement("strong");
-        title.textContent = check.label;
-        const description = document.createElement("span");
-        description.textContent = check.message;
-        item.append(title, description);
-        list.append(item);
-      }
-      el.pcBuilderResults.append(list);
-    } catch (error) {
-      if (requestId === state.compatibilityRequestId) {
-        renderPcBuilderMessage(error.message, "error");
-      }
-    } finally {
-      if (requestId === state.compatibilityRequestId) el.checkPcCompatibility.disabled = false;
-    }
-  }
-
-  el.checkPcCompatibility.addEventListener("click", checkPcBuilderCompatibility);
-  el.resetPcBuilder.addEventListener("click", () => {
-    for (const select of [el.builderCpu, el.builderMotherboard, el.builderRam, el.builderGpu, el.builderCase]) {
-      select.value = "";
-    }
-    state.compatibilityRequestId = (state.compatibilityRequestId || 0) + 1;
-    renderPcBuilderMessage("Select components to see compatibility results.");
-    el.checkPcCompatibility.disabled = false;
-  });
 
   function startProductRefresh() {
     setInterval(async () => {
@@ -360,11 +226,13 @@
 
   // Rendering: category nav strip (under header)
   function renderCategoryNav() {
-    el.categoryNavStrip.innerHTML = state.categories
-      .map((c) => `<a href="#" data-cat="${c.id}">${c.name}</a>`)
-      .join("");
+    el.categoryNavStrip.innerHTML = [
+      '<a href="/store.html">HOME</a>',
+      '<a href="/compatibility.html">Compatibility Checker</a>',
+      ...state.categories.map((c) => `<a href="#" data-cat="${c.id}">${c.name}</a>`)
+    ].join("");
 
-    el.categoryNavStrip.querySelectorAll("a").forEach((a) => {
+    el.categoryNavStrip.querySelectorAll("a[data-cat]").forEach((a) => {
       a.addEventListener("click", (e) => {
         e.preventDefault();
         setActiveCategory(a.dataset.cat);

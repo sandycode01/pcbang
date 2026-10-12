@@ -12,13 +12,11 @@ category preferences, and recent searches remain browser-local.
 
 **Public storefront (`/` or `/store.html`)**
 - Sticky header with logo, live search, and Cart / Wishlist / Support / Login actions
+- Category navigation includes Home and the separate Compatibility Checker page
 - Flash Sale banner with a live Hours:Minutes:Seconds countdown and a horizontally
   scrollable deals feed (discount %, price, stock meter)
 - Category grid and navigation (Processors, Graphics Cards, Motherboards, RAM,
   Storage, PSUs, Cases, Cooling, Peripherals, Laptops)
-- PC Component Compatibility Checker for CPU/motherboard socket, motherboard/RAM
-  generation, motherboard/case form-factor support, and graphics-card/case
-  clearance. Missing specifications are reported as unverified.
 - Slide-out storefront filters with category selection and minimum/maximum price
   ranges; filters can be combined to narrow the product feed
 - Personalized "Just For You" product feed showing up to 15 ranked products
@@ -79,6 +77,10 @@ automatically at server startup. This is an additive migration: it does not
 recreate the database, alter existing product/order rows, or remove the Docker
 database volume. Starter values are inserted only for products that do not
 already have compatibility data.
+
+Customers open the standalone checker at `/compatibility.html`, also linked
+from the storefront category navigation. It retains the store header, category
+navigation, and footer while hosting the compatibility form on its own page.
 
 To enter or update specifications, sign in at `/admin`, choose **Edit** for a
 component, expand **PC compatibility data**, and enter verified manufacturer

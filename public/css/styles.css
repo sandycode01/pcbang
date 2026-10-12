@@ -441,6 +441,13 @@ img { max-width: 100%; display: block; }
   padding-left: 10px;
 }
 
+.section-heading h1 {
+  font-size: 24px;
+  font-weight: 800;
+  margin: 0;
+  color: var(--pcb-navy);
+}
+
 .section-heading .subtitle {
   font-size: 12.5px;
   color: var(--pcb-text-light);

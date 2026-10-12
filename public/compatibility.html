@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PC Compatibility Checker | PCBang</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Audiowide&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/styles.css" />
+</head>
+<body>
+  <div class="top-bar">
+    <div class="container">
+      <div>Welcome to PCBang — your one-stop PC parts shop!</div>
+      <div class="top-bar-links">
+        <a href="/store.html">Shipping: Nationwide</a>
+        <a href="/store.html">Tracking Information</a>
+      </div>
+    </div>
+  </div>
+
+  <header class="site-header">
+    <div class="container header-inner">
+      <a href="/store.html" class="logo">
+        <span class="logo-text-wrap"><span class="PC">PC</span>Bang</span>
+      </a>
+      <form class="search-form" action="/store.html" method="get">
+        <input type="text" name="search" placeholder="Search for GPUs, CPUs, RAM, and more..." autocomplete="off" />
+        <button type="submit">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          Search
+        </button>
+      </form>
+      <div class="header-actions">
+        <a class="header-action" href="/store.html" aria-label="Shop products">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3h2l2.7 13.4a2 2 0 0 0 2 1.6h9.7a2 2 0 0 0 2-1.6L23 8H6"/></svg>
+          <span class="action-label">Shop</span>
+        </a>
+      </div>
+    </div>
+    <nav class="category-nav" aria-label="Main navigation">
+      <div class="container" id="categoryNavStrip">
+        <a href="/store.html">HOME</a>
+        <a href="/compatibility.html" aria-current="page">Compatibility Checker</a>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container compatibility-page">
+    <section class="section pc-builder-section" id="pcBuilder">
+      <div class="section-heading">
+        <div>
+          <h1>PC Component Compatibility Checker</h1>
+          <p class="subtitle">Choose your parts to check socket, RAM generation, case fit, and graphics-card clearance.</p>
+        </div>
+      </div>
+      <div class="pc-builder-panel">
+        <div class="pc-builder-grid">
+          <div class="form-group">
+            <label for="builderCpu">Processor</label>
+            <select id="builderCpu"><option value="">Choose a processor</option></select>
+          </div>
+          <div class="form-group">
+            <label for="builderMotherboard">Motherboard</label>
+            <select id="builderMotherboard"><option value="">Choose a motherboard</option></select>
+          </div>
+          <div class="form-group">
+            <label for="builderRam">Memory (RAM)</label>
+            <select id="builderRam"><option value="">Choose memory</option></select>
+          </div>
+          <div class="form-group">
+            <label for="builderGpu">Graphics card</label>
+            <select id="builderGpu"><option value="">Choose a graphics card</option></select>
+          </div>
+          <div class="form-group">
+            <label for="builderCase">PC case</label>
+            <select id="builderCase"><option value="">Choose a PC case</option></select>
+          </div>
+        </div>
+        <div class="pc-builder-actions">
+          <p>Checks use compatibility details recorded for each product. Missing specifications are reported as unverified.</p>
+          <div>
+            <button class="btn-secondary" id="resetPcBuilder" type="button">Clear selections</button>
+            <button class="btn-primary" id="checkPcCompatibility" type="button">Check compatibility</button>
+          </div>
+        </div>
+        <div class="pc-builder-results" id="pcBuilderResults" aria-live="polite" aria-atomic="true">
+          <p class="pc-builder-empty">Select components to see compatibility results.</p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container footer-columns">
+      <div>
+        <h4>Customer Care</h4>
+        <ul>
+          <li><a href="#">Help Center</a></li>
+          <li><a href="#">How to Buy</a></li>
+          <li><a href="#">Returns &amp; Refunds</a></li>
+          <li><a href="#">Warranty Claims</a></li>
+          <li><a href="#">Contact Us</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>Delivery Options</h4>
+        <ul>
+          <li><a href="#">Standard Delivery</a></li>
+          <li><a href="#">Same-Day Delivery</a></li>
+          <li><a href="#">Store Pickup</a></li>
+          <li><a href="#">Track My Order</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>Payment Methods</h4>
+        <ul>
+          <li><a href="#">Credit / Debit Card</a></li>
+          <li><a href="#">GCash / Maya</a></li>
+          <li><a href="#">Bank Transfer</a></li>
+          <li><a href="#">Cash on Delivery</a></li>
+          <li><a href="#">Installment Plans</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>About PCBang</h4>
+        <ul>
+          <li><a href="#">Our Story</a></li>
+          <li><a href="#">Careers</a></li>
+          <li><a href="#">Seller Center</a></li>
+          <li><a href="/admin">Admin Dashboard</a></li>
+        </ul>
+      </div>
+      <div class="footer-brand">
+        <div class="logo"><span class="logo-text-wrap"><span class="PC">PC</span>Bang</span></div>
+        <p>The Philippines' go-to online store for processors, graphics cards, and everything you need to build your dream PC.</p>
+        <div class="payment-icons">
+          <span>VISA</span><span>Mastercard</span><span>GCash</span><span>Maya</span><span>COD</span>
+        </div>
+        <div class="social-icons">
+          <a href="#" aria-label="Facebook">f</a>
+          <a href="#" aria-label="Twitter">𝕏</a>
+          <a href="#" aria-label="Instagram">◎</a>
+          <a href="#" aria-label="YouTube">▶</a>
+          <a href="#" aria-label="LinkedIn">in</a>
+        </div>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <div class="container">&copy; 2026 PCBang. All rights reserved. This is a demo project for educational purposes.</div>
+    </div>
+  </footer>
+  <script src="/js/compatibility.js"></script>
+</body>
+</html>

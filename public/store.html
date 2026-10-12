@@ -65,6 +65,8 @@
 
   <nav class="category-nav">
     <div class="container" id="categoryNavStrip">
+      <a href="/store.html">HOME</a>
+      <a href="/compatibility.html">Compatibility Checker</a>
       <!-- populated by JS -->
     </div>
   </nav>
@@ -126,50 +128,6 @@
     <div class="promo-card p3">
       <h3>Warranty Assured</h3>
       <p>Genuine parts with manufacturer warranty</p>
-    </div>
-  </section>
-
-  <!-- PC COMPONENT COMPATIBILITY CHECKER -->
-  <section class="section pc-builder-section" id="pcBuilder">
-    <div class="section-heading">
-      <div>
-        <h2>PC Component Compatibility Checker</h2>
-        <p class="subtitle">Choose your parts to check socket, RAM generation, case fit, and graphics-card clearance.</p>
-      </div>
-    </div>
-    <div class="pc-builder-panel">
-      <div class="pc-builder-grid">
-        <div class="form-group">
-          <label for="builderCpu">Processor</label>
-          <select id="builderCpu"><option value="">Choose a processor</option></select>
-        </div>
-        <div class="form-group">
-          <label for="builderMotherboard">Motherboard</label>
-          <select id="builderMotherboard"><option value="">Choose a motherboard</option></select>
-        </div>
-        <div class="form-group">
-          <label for="builderRam">Memory (RAM)</label>
-          <select id="builderRam"><option value="">Choose memory</option></select>
-        </div>
-        <div class="form-group">
-          <label for="builderGpu">Graphics card</label>
-          <select id="builderGpu"><option value="">Choose a graphics card</option></select>
-        </div>
-        <div class="form-group">
-          <label for="builderCase">PC case</label>
-          <select id="builderCase"><option value="">Choose a PC case</option></select>
-        </div>
-      </div>
-      <div class="pc-builder-actions">
-        <p>Checks use compatibility details recorded for each product. Missing specifications are reported as unverified.</p>
-        <div>
-          <button class="btn-secondary" id="resetPcBuilder" type="button">Clear selections</button>
-          <button class="btn-primary" id="checkPcCompatibility" type="button">Check compatibility</button>
-        </div>
-      </div>
-      <div class="pc-builder-results" id="pcBuilderResults" aria-live="polite" aria-atomic="true">
-        <p class="pc-builder-empty">Select components to see compatibility results.</p>
-      </div>
     </div>
   </section>
 
