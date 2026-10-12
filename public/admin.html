@@ -187,11 +187,13 @@
       </div>
       <div class="admin-panel">
         <div class="admin-panel-header flash-sale-panel-header">
-          <div>
+          <div class="flash-sale-heading">
             <h3>Flash Sale Products</h3>
-            <span class="flash-sale-countdown" id="flashSaleCountdown" aria-live="polite">Loading campaign…</span>
+            <div class="flash-sale-countdown-row">
+              <div class="flash-sale-countdown" id="flashSaleCountdown" aria-live="polite">Loading campaign…</div>
+              <button class="btn-secondary flash-sale-editor-trigger" id="openFlashSaleEditor" type="button" aria-label="Edit countdown">Edit timer</button>
+            </div>
           </div>
-          <button class="btn-secondary flash-sale-editor-trigger" id="openFlashSaleEditor" type="button">Edit countdown</button>
         </div>
         <div class="admin-table-wrap">
           <table class="admin-table flash-sale-table" id="flashSaleTable">

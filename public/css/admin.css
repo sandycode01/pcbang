@@ -246,9 +246,36 @@ body { background: var(--pcb-bg); }
 }
 
 .admin-panel-header h3 { margin: 0; font-size: 15px; font-weight: 800; color: var(--pcb-navy); }
-.flash-sale-panel-header > div { display: flex; flex-direction: column; gap: 4px; }
-.flash-sale-countdown { font-size: 12px; color: var(--pcb-text-light); font-variant-numeric: tabular-nums; }
-.flash-sale-editor-trigger { flex: 0 0 auto; padding: 9px 13px; }
+.flash-sale-panel-header { gap: 16px; }
+.flash-sale-heading { display: flex; flex-direction: column; align-items: flex-start; gap: 8px; min-width: 0; }
+.flash-sale-countdown-row { display: flex; align-items: center; flex-wrap: wrap; gap: 10px; }
+.flash-sale-countdown { display: flex; align-items: center; gap: 6px; color: var(--pcb-text-light); font-variant-numeric: tabular-nums; }
+.flash-sale-countdown-label { font-size: 12px; font-weight: 700; margin-right: 2px; }
+.flash-sale-countdown-unit {
+  min-width: 38px;
+  padding: 4px 7px;
+  border-radius: 6px;
+  background: #eaf1ff;
+  color: var(--pcb-navy);
+  text-align: center;
+  font-size: 16px;
+  font-weight: 800;
+  line-height: 1.05;
+}
+.flash-sale-countdown-unit small { display: block; margin-top: 2px; color: var(--pcb-text-light); font-size: 8px; text-transform: uppercase; }
+.flash-sale-countdown-ended { color: var(--pcb-danger); font-size: 12px; font-weight: 700; }
+.btn-secondary.flash-sale-editor-trigger {
+  flex: 0 0 auto;
+  width: auto;
+  padding: 7px 10px;
+  background: #eef3ff;
+  border: 1px solid var(--pcb-blue);
+  border-radius: var(--radius-sm);
+  color: var(--pcb-blue);
+  font-size: 12px;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+.btn-secondary.flash-sale-editor-trigger:hover { background: var(--pcb-blue); color: white; }
 .flash-sale-editor-box { max-width: 430px; }
 .flash-sale-editor-actions { display: flex; gap: 10px; margin-top: 20px; }
 .flash-sale-editor-actions button { flex: 1; }
@@ -463,7 +490,12 @@ body { background: var(--pcb-bg); }
   .admin-sidebar-storefront, .admin-logout-btn { width: auto; }
   .admin-main { padding: 20px 16px 50px; }
   .admin-table-wrap { max-height: 55vh; }
-  .flash-sale-panel-header { align-items: flex-start; gap: 12px; }
+  .flash-sale-panel-header { align-items: center; gap: 10px; }
+  .flash-sale-heading { align-items: flex-start; }
+  .flash-sale-countdown-row { gap: 7px; }
+  .flash-sale-countdown { gap: 4px; }
+  .flash-sale-countdown-unit { min-width: 33px; padding: 4px 5px; font-size: 14px; }
+  .btn-secondary.flash-sale-editor-trigger { white-space: nowrap; padding: 7px 9px; }
   .flash-sale-editor-actions { flex-direction: column-reverse; }
   .stats-grid { grid-template-columns: 1fr 1fr; }
   .product-detail-layout, .product-detail-columns { grid-template-columns: 1fr; gap: 14px; }

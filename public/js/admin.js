@@ -476,19 +476,25 @@
   function updateFlashSaleCountdown() {
     const remaining = Number(state.flashSaleEndsAt) - Date.now();
     if (!state.flashSaleEndsAt) {
-      el.flashSaleCountdown.textContent = "No campaign countdown set";
+      el.flashSaleCountdown.innerHTML = `<span class="flash-sale-countdown-ended">No campaign countdown set</span>`;
       return;
     }
     if (remaining <= 0) {
-      el.flashSaleCountdown.textContent = "Campaign ended";
+      el.flashSaleCountdown.innerHTML = `<span class="flash-sale-countdown-ended">Campaign ended</span>`;
       return;
     }
-    const days = Math.floor(remaining / 86400000);
-    const hours = Math.floor((remaining % 86400000) / 3600000);
+    const hours = Math.floor(remaining / 3600000);
     const minutes = Math.floor((remaining % 3600000) / 60000);
     const seconds = Math.floor((remaining % 60000) / 1000);
-    const clock = [hours, minutes, seconds].map((value) => String(value).padStart(2, "0")).join(":");
-    el.flashSaleCountdown.textContent = `Ends in ${days ? `${days}d ` : ""}${clock}`;
+    const unit = (value, label) => `
+      <span class="flash-sale-countdown-unit">
+        ${String(value).padStart(2, "0")}<small>${label}</small>
+      </span>`;
+    el.flashSaleCountdown.innerHTML = `
+      <span class="flash-sale-countdown-label">Ends in</span>
+      ${unit(hours, "Hrs")}
+      ${unit(minutes, "Min")}
+      ${unit(seconds, "Sec")}`;
   }
 
   setInterval(updateFlashSaleCountdown, 1000);
