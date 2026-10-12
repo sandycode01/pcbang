@@ -233,7 +233,7 @@
 <!-- ===================== ADD / EDIT PRODUCT MODAL ===================== -->
 <div class="modal" id="productModal">
   <div class="modal-backdrop"></div>
-  <div class="modal-box wide">
+  <div class="modal-box wide product-modal-box">
     <button class="modal-close" data-close-modal="productModal">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
     </button>
@@ -289,35 +289,37 @@
 
       <details class="compatibility-details">
         <summary>PC compatibility data (optional)</summary>
-        <p>Enter verified manufacturer specifications. Leave unknown details blank; the checker will show them as unverified.</p>
-        <div class="form-row">
-          <div class="form-group">
-            <label for="pfCpuSocket">CPU socket</label>
-            <input type="text" id="pfCpuSocket" maxlength="40" placeholder="e.g. AM5 or LGA1700" />
+        <div class="compatibility-details-content">
+          <p>Enter verified manufacturer specifications. Leave unknown details blank; the checker will show them as unverified.</p>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="pfCpuSocket">CPU socket</label>
+              <input type="text" id="pfCpuSocket" maxlength="40" placeholder="e.g. AM5 or LGA1700" />
+            </div>
+            <div class="form-group">
+              <label for="pfMemoryType">RAM generation</label>
+              <input type="text" id="pfMemoryType" maxlength="20" placeholder="e.g. DDR4 or DDR5" />
+            </div>
           </div>
-          <div class="form-group">
-            <label for="pfMemoryType">RAM generation</label>
-            <input type="text" id="pfMemoryType" maxlength="20" placeholder="e.g. DDR4 or DDR5" />
+          <div class="form-row">
+            <div class="form-group">
+              <label for="pfMotherboardFormFactor">Motherboard form factor</label>
+              <input type="text" id="pfMotherboardFormFactor" maxlength="40" placeholder="e.g. ATX or Micro-ATX" />
+            </div>
+            <div class="form-group">
+              <label for="pfSupportedFormFactors">Case motherboard support</label>
+              <input type="text" id="pfSupportedFormFactors" maxlength="200" placeholder="Comma-separated, e.g. ATX, Micro-ATX" />
+            </div>
           </div>
-        </div>
-        <div class="form-row">
-          <div class="form-group">
-            <label for="pfMotherboardFormFactor">Motherboard form factor</label>
-            <input type="text" id="pfMotherboardFormFactor" maxlength="40" placeholder="e.g. ATX or Micro-ATX" />
-          </div>
-          <div class="form-group">
-            <label for="pfSupportedFormFactors">Case motherboard support</label>
-            <input type="text" id="pfSupportedFormFactors" maxlength="200" placeholder="Comma-separated, e.g. ATX, Micro-ATX" />
-          </div>
-        </div>
-        <div class="form-row">
-          <div class="form-group">
-            <label for="pfGpuLengthMm">Graphics card length (mm)</label>
-            <input type="number" id="pfGpuLengthMm" min="1" max="1000" step="1" placeholder="e.g. 300" />
-          </div>
-          <div class="form-group">
-            <label for="pfMaxGpuLengthMm">Case GPU clearance (mm)</label>
-            <input type="number" id="pfMaxGpuLengthMm" min="1" max="1000" step="1" placeholder="e.g. 365" />
+          <div class="form-row">
+            <div class="form-group">
+              <label for="pfGpuLengthMm">Graphics card length (mm)</label>
+              <input type="number" id="pfGpuLengthMm" min="1" max="1000" step="1" placeholder="e.g. 300" />
+            </div>
+            <div class="form-group">
+              <label for="pfMaxGpuLengthMm">Case GPU clearance (mm)</label>
+              <input type="number" id="pfMaxGpuLengthMm" min="1" max="1000" step="1" placeholder="e.g. 365" />
+            </div>
           </div>
         </div>
       </details>

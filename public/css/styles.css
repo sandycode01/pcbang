@@ -1240,6 +1240,23 @@ img { max-width: 100%; display: block; }
   overflow: hidden;
 }
 .account-modal-box h3 { flex: 0 0 auto; }
+.product-modal-box {
+  display: flex;
+  flex-direction: column;
+  max-height: calc(100vh - 40px);
+  max-height: calc(100dvh - 40px);
+  min-height: 0;
+  overflow: hidden;
+}
+.product-modal-box h3,
+.product-modal-box > .modal-desc { flex: 0 0 auto; }
+#productForm {
+  flex: 0 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-gutter: stable;
+}
 #accountContent {
   flex: 1 1 auto;
   min-height: 0;
