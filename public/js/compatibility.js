@@ -14,6 +14,25 @@
   const nav = document.getElementById("categoryNavStrip");
   let requestVersion = 0;
 
+  function createProductImage(product) {
+    const frame = document.createElement("span");
+    frame.className = "pc-builder-option-image";
+    frame.dataset.category = product.category;
+    const image = document.createElement("img");
+    image.alt = "";
+    image.addEventListener("error", () => {
+      frame.classList.add("image-missing");
+      image.remove();
+    }, { once: true });
+    frame.append(image);
+    if (product.image) image.src = product.image;
+    else {
+      frame.classList.add("image-missing");
+      image.remove();
+    }
+    return frame;
+  }
+
   function showMessage(message, status) {
     const summary = document.createElement("div");
     summary.className = `pc-builder-summary ${status || "empty"}`;
@@ -22,16 +41,66 @@
   }
 
   function populateSelect(select, products, category, placeholder) {
-    const options = products
-      .filter((product) => product.category === category)
-      .map((product) => {
-        const option = document.createElement("option");
-        option.value = product.id;
-        option.textContent = `${product.title} — ${Number(product.stock) > 0 ? `${product.stock} in stock` : "Out of stock"}`;
-        option.disabled = Number(product.stock) <= 0;
-        return option;
-      });
+    const picker = document.querySelector(`.pc-builder-picker[data-select="${select.id}"]`);
+    const summary = picker.querySelector(".pc-builder-picker-summary");
+    const optionList = picker.querySelector(".pc-builder-picker-options");
+    const entries = products.filter((product) => product.category === category);
+    const options = entries.map((product) => {
+      const option = document.createElement("option");
+      option.value = product.id;
+      option.textContent = `${product.title} — ${Number(product.stock) > 0 ? `${product.stock} in stock` : "Out of stock"}`;
+      option.disabled = Number(product.stock) <= 0;
+      return option;
+    });
     select.replaceChildren(new Option(placeholder, ""), ...options);
+    optionList.replaceChildren();
+
+    for (const product of entries) {
+      const button = document.createElement("button");
+      button.className = "pc-builder-option";
+      button.type = "button";
+      button.setAttribute("role", "option");
+      button.disabled = Number(product.stock) <= 0;
+      button.setAttribute("aria-selected", "false");
+
+      const image = createProductImage(product);
+      const info = document.createElement("span");
+      info.className = "pc-builder-option-info";
+      const title = document.createElement("strong");
+      title.textContent = product.title;
+      const stock = document.createElement("small");
+      stock.textContent = Number(product.stock) > 0 ? `${product.stock} in stock` : "Out of stock";
+      info.append(title, stock);
+      button.append(image, info);
+
+      button.addEventListener("click", () => {
+        select.value = product.id;
+        summary.replaceChildren(createProductImage(product));
+        const selectedText = document.createElement("span");
+        selectedText.className = "pc-builder-selected-title";
+        selectedText.textContent = product.title;
+        summary.append(selectedText);
+        optionList.querySelectorAll(".pc-builder-option").forEach((item) => {
+          item.setAttribute("aria-selected", String(item === button));
+        });
+        picker.open = false;
+        select.dispatchEvent(new Event("change"));
+      });
+      optionList.append(button);
+    }
+
+    picker.addEventListener("toggle", () => {
+      if (picker.open) {
+        document.querySelectorAll(".pc-builder-picker[open]").forEach((otherPicker) => {
+          if (otherPicker !== picker) otherPicker.open = false;
+        });
+      }
+    });
+    select.addEventListener("change", () => {
+      if (select.value) return;
+      summary.textContent = placeholder;
+      optionList.querySelectorAll(".pc-builder-option").forEach((item) => item.setAttribute("aria-selected", "false"));
+    });
   }
 
   function renderCategories(categories) {
@@ -113,7 +182,10 @@
 
   checkButton.addEventListener("click", checkCompatibility);
   resetButton.addEventListener("click", () => {
-    Object.values(selects).forEach((select) => { select.value = ""; });
+    Object.values(selects).forEach((select) => {
+      select.value = "";
+      select.dispatchEvent(new Event("change"));
+    });
     requestVersion += 1;
     checkButton.disabled = false;
     showMessage("Select components to see compatibility results.");

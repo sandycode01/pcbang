@@ -297,15 +297,23 @@ app.get("/api/pc-builder/products", async (req, res, next) => {
   try {
     const [rows] = await pool.query(`
       SELECT p.id, p.title, p.category_id AS category, p.price, p.stock, p.image,
+             c.name AS categoryName,
              pc.cpu_socket AS compatibilityCpuSocket, pc.memory_type AS compatibilityMemoryType,
              pc.motherboard_form_factor AS compatibilityMotherboardFormFactor,
              pc.supported_form_factors AS compatibilitySupportedFormFactors,
              pc.gpu_length_mm AS compatibilityGpuLengthMm,
              pc.max_gpu_length_mm AS compatibilityMaxGpuLengthMm
-      FROM products p LEFT JOIN product_compatibility pc ON pc.product_id = p.id
+      FROM products p
+      JOIN categories c ON c.id = p.category_id
+      LEFT JOIN product_compatibility pc ON pc.product_id = p.id
       WHERE p.category_id IN ('cpu', 'mobo', 'ram', 'gpu', 'case')
       ORDER BY p.category_id, p.title`);
-    res.json(rows.map(serializeProduct));
+    res.json(rows.map((row) => {
+      const product = serializeProduct(row);
+      product.image = resolveCatalogImage({ ...product, category: row.categoryName });
+      delete product.categoryName;
+      return product;
+    }));
   } catch (err) { next(err); }
 });
 

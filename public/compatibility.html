@@ -59,23 +59,43 @@
         <div class="pc-builder-grid">
           <div class="form-group">
             <label for="builderCpu">Processor</label>
-            <select id="builderCpu"><option value="">Choose a processor</option></select>
+            <details class="pc-builder-picker" data-select="builderCpu">
+              <summary class="pc-builder-picker-summary">Choose a processor</summary>
+              <div class="pc-builder-picker-options" role="listbox" aria-label="Processor options"></div>
+            </details>
+            <select id="builderCpu" class="pc-builder-value" hidden><option value="">Choose a processor</option></select>
           </div>
           <div class="form-group">
             <label for="builderMotherboard">Motherboard</label>
-            <select id="builderMotherboard"><option value="">Choose a motherboard</option></select>
+            <details class="pc-builder-picker" data-select="builderMotherboard">
+              <summary class="pc-builder-picker-summary">Choose a motherboard</summary>
+              <div class="pc-builder-picker-options" role="listbox" aria-label="Motherboard options"></div>
+            </details>
+            <select id="builderMotherboard" class="pc-builder-value" hidden><option value="">Choose a motherboard</option></select>
           </div>
           <div class="form-group">
             <label for="builderRam">Memory (RAM)</label>
-            <select id="builderRam"><option value="">Choose memory</option></select>
+            <details class="pc-builder-picker" data-select="builderRam">
+              <summary class="pc-builder-picker-summary">Choose memory</summary>
+              <div class="pc-builder-picker-options" role="listbox" aria-label="Memory options"></div>
+            </details>
+            <select id="builderRam" class="pc-builder-value" hidden><option value="">Choose memory</option></select>
           </div>
           <div class="form-group">
             <label for="builderGpu">Graphics card</label>
-            <select id="builderGpu"><option value="">Choose a graphics card</option></select>
+            <details class="pc-builder-picker" data-select="builderGpu">
+              <summary class="pc-builder-picker-summary">Choose a graphics card</summary>
+              <div class="pc-builder-picker-options" role="listbox" aria-label="Graphics card options"></div>
+            </details>
+            <select id="builderGpu" class="pc-builder-value" hidden><option value="">Choose a graphics card</option></select>
           </div>
           <div class="form-group">
             <label for="builderCase">PC case</label>
-            <select id="builderCase"><option value="">Choose a PC case</option></select>
+            <details class="pc-builder-picker" data-select="builderCase">
+              <summary class="pc-builder-picker-summary">Choose a PC case</summary>
+              <div class="pc-builder-picker-options" role="listbox" aria-label="PC case options"></div>
+            </details>
+            <select id="builderCase" class="pc-builder-value" hidden><option value="">Choose a PC case</option></select>
           </div>
         </div>
         <div class="pc-builder-actions">

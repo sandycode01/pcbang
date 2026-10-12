@@ -81,6 +81,8 @@ already have compatibility data.
 Customers open the standalone checker at `/compatibility.html`, also linked
 from the storefront category navigation. It retains the store header, category
 navigation, and footer while hosting the compatibility form on its own page.
+Each component picker is an expandable list with a product thumbnail, name, and
+stock status.
 
 To enter or update specifications, sign in at `/admin`, choose **Edit** for a
 component, expand **PC compatibility data**, and enter verified manufacturer
