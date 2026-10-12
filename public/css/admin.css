@@ -302,7 +302,7 @@ body { background: var(--pcb-bg); }
 }
 
 .admin-table-wrap {
-  max-height: min(60vh, 560px);
+  max-height: 80vh;
   overflow: auto;
   overscroll-behavior: contain;
   scrollbar-gutter: stable;
@@ -489,7 +489,7 @@ body { background: var(--pcb-bg); }
   .admin-nav { flex-direction: row; flex: none; }
   .admin-sidebar-storefront, .admin-logout-btn { width: auto; }
   .admin-main { padding: 20px 16px 50px; }
-  .admin-table-wrap { max-height: 55vh; }
+  .admin-table-wrap { max-height: 80vh;}
   .flash-sale-panel-header { align-items: center; gap: 10px; }
   .flash-sale-heading { align-items: flex-start; }
   .flash-sale-countdown-row { gap: 7px; }
