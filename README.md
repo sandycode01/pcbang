@@ -40,8 +40,10 @@ category preferences, and recent searches remain browser-local.
   title, category, price, discount price, stock, rating, specs, and icon
 - Customer Orders: newest-first order list with order number, customer, delivery
   destination, contact number, payment method, total, status, and date ordered
-- Flash Sale Management: one-click toggle switches to add/remove any product
-  from the storefront's Flash Sale banner
+- Flash Sale Management: toggle products into the sale, set an independent sale
+  price, view stock, and manage a shared live campaign countdown. Sale prices
+  automatically stop applying when the campaign expires; each product then
+  returns to its regular selling price (including any standard discount)
 - Admin data tables have a viewport-limited height and independent scrolling;
   column headers remain visible while scrolling, and the height limit adjusts
   for smaller screens
@@ -166,6 +168,7 @@ pcbang/
 - `GET /api/categories`
 - `GET /api/products` — supports `?category=`, `?search=`, `?flashSale=true`
 - `GET /api/products/:id`
+- `GET /api/flash-sale` — current shared campaign end time and active state
 
 **Customer accounts** (account routes require `Authorization: Bearer <token>`)
 - `POST /api/auth/signup` — `{ name, email, password, age, address, phone }`
@@ -178,8 +181,12 @@ pcbang/
 - `GET /api/admin/stats`
 - `GET /api/admin/products`
 - `GET /api/admin/orders` — customer and order summary, newest first
+- `GET /api/admin/flash-sale`
+- `PUT /api/admin/flash-sale` — `{ endsAt }` as a future Unix timestamp in
+  milliseconds, or `{ endsAt: null }` to end the campaign immediately
 - `POST /api/admin/products`
-- `PUT /api/admin/products/:id`
+- `PUT /api/admin/products/:id` — accepts `salePrice` independently of
+  `discountPrice`; send `null` or an empty string to clear it
 - `DELETE /api/admin/products/:id`
 
 **Orders**

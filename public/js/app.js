@@ -13,8 +13,10 @@
     activeCategory: "all",
     searchQuery: "",
     showingWishlist: false,
+    productDetailsId: null,
     minPrice: null,
     maxPrice: null,
+    flashSaleEndsAt: null,
     cart: loadFromStorage("pcbang_cart", []),
     wishlist: loadFromStorage("pcbang_wishlist", []),
     recentlyViewed: loadFromStorage("pcbang_recently_viewed", []),
@@ -72,6 +74,15 @@
 
   const money = (n) =>
     "₱" + Number(n).toLocaleString("en-PH", { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+
+  function isFlashSaleActive(product) {
+    return !!product.flashSale && Number(state.flashSaleEndsAt) > Date.now();
+  }
+
+  function effectivePrice(product) {
+    if (isFlashSaleActive(product) && Number(product.salePrice) > 0) return Number(product.salePrice);
+    return Number(product.discountPrice) || Number(product.price);
+  }
 
   // DOM refs
   const el = {
@@ -134,12 +145,14 @@
     updateWishlistBadge();
 
     try {
-      const [catRes, prodRes] = await Promise.all([
+      const [catRes, prodRes, saleRes] = await Promise.all([
         fetch("/api/categories"),
-        fetch("/api/products")
+        fetch("/api/products"),
+        fetch("/api/flash-sale", { cache: "no-store" })
       ]);
       state.categories = await catRes.json();
       state.allProducts = await prodRes.json();
+      state.flashSaleEndsAt = (await saleRes.json()).endsAt;
       syncWishlistWithProducts();
 
       renderCategoryNav();
@@ -158,40 +171,47 @@
     setInterval(async () => {
       if (document.hidden) return;
       try {
-        const response = await fetch("/api/products", { cache: "no-store" });
-        if (!response.ok) return;
-        state.allProducts = await response.json();
+        const [response, saleResponse] = await Promise.all([
+          fetch("/api/products", { cache: "no-store" }),
+          fetch("/api/flash-sale", { cache: "no-store" })
+        ]);
+        if (!response.ok || !saleResponse.ok) return;
+        const [products, saleConfig] = await Promise.all([response.json(), saleResponse.json()]);
+        state.allProducts = products;
+        state.flashSaleEndsAt = saleConfig.endsAt;
         syncWishlistWithProducts();
         applyFilters();
         renderFlashSale();
+        renderCartPanel();
       } catch (err) {
         console.warn("Live product refresh failed:", err.message);
       }
     }, 5000);
   }
 
-  // Countdown timer (resets to a fresh 6-hour window when it hits zero)
+  // Countdown uses the shared campaign end time configured by the admin.
   function startCountdown() {
-    const DURATION_MS = 6 * 60 * 60 * 1000; // 6 hours
-    let endTime = Number(sessionStorage.getItem("pcbang_flash_end"));
-    if (!endTime || endTime < Date.now()) {
-      endTime = Date.now() + DURATION_MS;
-      sessionStorage.setItem("pcbang_flash_end", String(endTime));
-    }
-
+    const label = document.querySelector("#countdown .countdown-label");
+    let wasActive = false;
     function tick() {
-      const remaining = endTime - Date.now();
-      if (remaining <= 0) {
-        endTime = Date.now() + DURATION_MS;
-        sessionStorage.setItem("pcbang_flash_end", String(endTime));
-      }
-      const total = Math.max(0, endTime - Date.now());
+      const total = Math.max(0, Number(state.flashSaleEndsAt) - Date.now());
+      const active = total > 0;
       const hours = Math.floor(total / (1000 * 60 * 60));
       const minutes = Math.floor((total / (1000 * 60)) % 60);
       const seconds = Math.floor((total / 1000) % 60);
+      label.textContent = active ? "Ends in" : "Sale ended";
       document.getElementById("cd-hours").textContent = String(hours).padStart(2, "0");
       document.getElementById("cd-minutes").textContent = String(minutes).padStart(2, "0");
       document.getElementById("cd-seconds").textContent = String(seconds).padStart(2, "0");
+      if (wasActive && !active) {
+        applyFilters();
+        renderFlashSale();
+        renderCartPanel();
+        if (el.productDetailsModal.classList.contains("open") && state.productDetailsId) {
+          openProductDetails(state.productDetailsId);
+        }
+      }
+      wasActive = active;
     }
 
     tick();
@@ -233,7 +253,7 @@
 
   // Rendering: flash sale horizontal scroll feed
   function renderFlashSale() {
-    const flashItems = state.allProducts.filter((p) => p.flashSale);
+    const flashItems = state.allProducts.filter(isFlashSaleActive);
     if (flashItems.length === 0) {
       el.flashScroll.innerHTML = `<div class="empty-state" style="color:#fff;background:transparent;">No flash sale items right now. Check back soon!</div>`;
       return;
@@ -250,9 +270,12 @@
   }
 
   function flashCardTemplate(p) {
-    const discountPct = p.discountPrice
-      ? Math.round(100 - (p.discountPrice / p.price) * 100)
-      : 0;
+    const hasFlashSalePrice = isFlashSaleActive(p) && Number(p.salePrice) > 0;
+    const basePrice = hasFlashSalePrice
+      ? Number(p.discountPrice) || Number(p.price)
+      : Number(p.price);
+    const currentPrice = effectivePrice(p);
+    const discountPct = Math.max(0, Math.round(100 - (currentPrice / basePrice) * 100));
     const stockPct = Math.min(100, Math.max(6, 100 - p.stock * 2));
     return `
       <div class="flash-card" data-id="${p.id}">
@@ -263,8 +286,8 @@
         <div class="flash-card-body">
           <div class="flash-card-title">${p.title}</div>
           <div class="flash-card-prices">
-            <span class="price-now">${money(p.discountPrice)}</span>
-            <span class="price-was">${money(p.price)}</span>
+            <span class="price-now">${money(currentPrice)}</span>
+            <span class="price-was">${money(basePrice)}</span>
           </div>
           <div class="stock-bar-wrap">
             <div class="stock-bar-fill" style="width:${stockPct}%"></div>
@@ -337,7 +360,7 @@
     }
 
     list = list.filter((product) => {
-      const price = Number(product.discountPrice) || Number(product.price);
+      const price = effectivePrice(product);
       return (state.minPrice === null || price >= state.minPrice) &&
         (state.maxPrice === null || price <= state.maxPrice);
     });
@@ -390,7 +413,7 @@
           (viewedIds.get(product.id) || 0) * 10 +
           (preferred.get(product.category) || 0) * 5 +
           (searchMatches.has(product.id) ? 50 : 0) +
-          (product.flashSale ? 1 : 0)
+          (isFlashSaleActive(product) ? 1 : 0)
       }))
       .filter((entry) => entry.score > 0)
       .sort((a, b) => b.score - a.score)
@@ -438,8 +461,13 @@
   }
 
   function productCardTemplate(p) {
-    const hasDiscount = !!p.discountPrice;
-    const discountPct = hasDiscount ? Math.round(100 - (p.discountPrice / p.price) * 100) : 0;
+    const salePriceActive = isFlashSaleActive(p) && Number(p.salePrice) > 0;
+    const comparePrice = salePriceActive
+      ? Number(p.discountPrice) || Number(p.price)
+      : Number(p.price);
+    const currentPrice = effectivePrice(p);
+    const hasDiscount = currentPrice < comparePrice;
+    const discountPct = hasDiscount ? Math.round(100 - (currentPrice / comparePrice) * 100) : 0;
     const inWishlist = state.wishlist.includes(p.id);
     const stockLabel =
       p.stock === 0
@@ -460,8 +488,8 @@
         <div class="product-body">
           <div class="product-title">${p.title}</div>
           <div class="product-prices">
-            <span class="product-price-now ${hasDiscount ? "on-sale" : ""}">${money(p.discountPrice || p.price)}</span>
-            ${hasDiscount ? `<span class="product-price-was">${money(p.price)}</span>` : ""}
+            <span class="product-price-now ${hasDiscount ? "on-sale" : ""}">${money(currentPrice)}</span>
+            ${hasDiscount ? `<span class="product-price-was">${money(comparePrice)}</span>` : ""}
           </div>
           <div class="product-meta">
             <span class="rating-row">
@@ -488,18 +516,25 @@
   function openProductDetails(productId) {
     const product = state.allProducts.find((p) => p.id === productId);
     if (!product) return;
+    state.productDetailsId = productId;
     rememberViewed(product);
     const category = state.categories.find((c) => c.id === product.category);
     const related = state.allProducts.filter((p) => p.category === product.category && p.id !== product.id).slice(0, 4);
+    const salePriceActive = isFlashSaleActive(product) && Number(product.salePrice) > 0;
+    const comparePrice = salePriceActive
+      ? Number(product.discountPrice) || Number(product.price)
+      : Number(product.price);
+    const currentPrice = effectivePrice(product);
+    const flashSaleActive = isFlashSaleActive(product);
     el.productDetailsContent.innerHTML = `
       <div class="storefront-detail-main">
         <div class="storefront-detail-image">${productImageMarkup(product)}</div>
         <div class="storefront-detail-copy">
           <span class="detail-category">${category ? category.name : product.category}</span>
           <h3>${product.title}</h3>
-          ${product.flashSale ? `<span class="detail-sale-label">Flash Sale</span>` : ""}
+          ${flashSaleActive ? `<span class="detail-sale-label">Flash Sale</span>` : ""}
           <div class="detail-rating">★ ${product.rating.toFixed(1)} <span>(${product.sold} sold)</span></div>
-          <div class="detail-price">${money(product.discountPrice || product.price)} ${product.discountPrice ? `<s>${money(product.price)}</s>` : ""}</div>
+          <div class="detail-price">${money(currentPrice)} ${currentPrice < comparePrice ? `<s>${money(comparePrice)}</s>` : ""}</div>
           <p class="detail-stock">${product.stock > 0 ? `${product.stock} units available` : "Out of stock"}</p>
           <div class="detail-purchase-row">
             <span class="detail-quantity-label">Quantity</span>
@@ -540,7 +575,7 @@
   }
 
   function relatedProductTemplate(product) {
-    return `<button class="related-product-card" data-id="${product.id}"><div class="related-product-image">${productImageMarkup(product)}</div><strong>${truncate(product.title, 42)}</strong><span>${money(product.discountPrice || product.price)}</span></button>`;
+    return `<button class="related-product-card" data-id="${product.id}"><div class="related-product-image">${productImageMarkup(product)}</div><strong>${truncate(product.title, 42)}</strong><span>${money(effectivePrice(product))}</span></button>`;
   }
 
   // Cart logic
@@ -624,7 +659,7 @@
       .map((item) => {
         const product = state.allProducts.find((p) => p.id === item.id);
         if (!product) return null;
-        const unitPrice = product.discountPrice || product.price;
+        const unitPrice = effectivePrice(product);
         return { ...item, product, unitPrice, lineTotal: unitPrice * item.qty };
       })
       .filter(Boolean);

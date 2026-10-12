@@ -186,10 +186,17 @@
         </div>
       </div>
       <div class="admin-panel">
+        <div class="admin-panel-header flash-sale-panel-header">
+          <div>
+            <h3>Flash Sale Products</h3>
+            <span class="flash-sale-countdown" id="flashSaleCountdown" aria-live="polite">Loading campaign…</span>
+          </div>
+          <button class="btn-secondary flash-sale-editor-trigger" id="openFlashSaleEditor" type="button">Edit countdown</button>
+        </div>
         <div class="admin-table-wrap">
-          <table class="admin-table" id="flashSaleTable">
+          <table class="admin-table flash-sale-table" id="flashSaleTable">
             <thead>
-              <tr><th>Product</th><th>Category</th><th>Regular Price</th><th>Sale Price</th><th>In Flash Sale</th></tr>
+              <tr><th>Product</th><th>Category</th><th>Normal Price</th><th>Flash Sale Price</th><th>Stock</th><th>In Flash Sale</th></tr>
             </thead>
             <tbody></tbody>
           </table>
@@ -198,6 +205,27 @@
     </section>
 
   </main>
+</div>
+
+<div class="modal" id="flashSaleEditorModal">
+  <div class="modal-backdrop"></div>
+  <div class="modal-box flash-sale-editor-box" role="dialog" aria-modal="true" aria-labelledby="flashSaleEditorTitle">
+    <button class="modal-close" data-close-modal="flashSaleEditorModal" type="button" aria-label="Close">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </button>
+    <h3 id="flashSaleEditorTitle">Flash Sale Countdown</h3>
+    <p class="modal-desc">Choose when the current sale campaign ends. Sale prices automatically turn off at that time.</p>
+    <form id="flashSaleForm">
+      <div class="form-group">
+        <label for="flashSaleEndAt">Campaign end date and time</label>
+        <input type="datetime-local" id="flashSaleEndAt" required />
+      </div>
+      <div class="flash-sale-editor-actions">
+        <button type="button" class="btn-secondary" id="clearFlashSaleCountdown">End campaign now</button>
+        <button type="submit" class="btn-accent" id="saveFlashSaleCountdown">Save countdown</button>
+      </div>
+    </form>
+  </div>
 </div>
 
 <!-- ===================== ADD / EDIT PRODUCT MODAL ===================== -->

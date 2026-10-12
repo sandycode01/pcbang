@@ -35,6 +35,20 @@ async function initializeDatabase() {
         CONSTRAINT fk_user_sessions_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
         INDEX idx_user_sessions_user (user_id)
       )`);
+    const [salePriceColumn] = await connection.query(
+      `SELECT COUNT(*) AS count FROM information_schema.columns
+       WHERE table_schema = DATABASE() AND table_name = 'products' AND column_name = 'sale_price'`
+    );
+    if (!salePriceColumn[0].count) {
+      await connection.query("ALTER TABLE products ADD COLUMN sale_price DECIMAL(12,2) NULL AFTER discount_price");
+    }
+    await connection.query(`
+      CREATE TABLE IF NOT EXISTS flash_sale_settings (
+        id TINYINT UNSIGNED PRIMARY KEY,
+        ends_at_ms BIGINT UNSIGNED NULL
+      )`);
+    await connection.query("INSERT IGNORE INTO flash_sale_settings (id, ends_at_ms) VALUES (1, NULL)");
+
     const [orderUserColumn] = await connection.query(
       `SELECT COUNT(*) AS count FROM information_schema.columns
        WHERE table_schema = DATABASE() AND table_name = 'orders' AND column_name = 'user_id'`

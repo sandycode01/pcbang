@@ -13,6 +13,7 @@ CREATE TABLE IF NOT EXISTS products (
   category_id VARCHAR(32) NOT NULL,
   price DECIMAL(12,2) NOT NULL,
   discount_price DECIMAL(12,2) NULL,
+  sale_price DECIMAL(12,2) NULL,
   stock INT UNSIGNED NOT NULL DEFAULT 0,
   sold INT UNSIGNED NOT NULL DEFAULT 0,
   rating DECIMAL(2,1) NOT NULL DEFAULT 4.5,
@@ -25,6 +26,11 @@ CREATE TABLE IF NOT EXISTS products (
   INDEX idx_products_category (category_id),
   INDEX idx_products_flash_sale (flash_sale),
   FULLTEXT INDEX idx_products_search (title, specs)
+);
+
+CREATE TABLE IF NOT EXISTS flash_sale_settings (
+  id TINYINT UNSIGNED PRIMARY KEY,
+  ends_at_ms BIGINT UNSIGNED NULL
 );
 
 CREATE TABLE IF NOT EXISTS users (

@@ -246,6 +246,25 @@ body { background: var(--pcb-bg); }
 }
 
 .admin-panel-header h3 { margin: 0; font-size: 15px; font-weight: 800; color: var(--pcb-navy); }
+.flash-sale-panel-header > div { display: flex; flex-direction: column; gap: 4px; }
+.flash-sale-countdown { font-size: 12px; color: var(--pcb-text-light); font-variant-numeric: tabular-nums; }
+.flash-sale-editor-trigger { flex: 0 0 auto; padding: 9px 13px; }
+.flash-sale-editor-box { max-width: 430px; }
+.flash-sale-editor-actions { display: flex; gap: 10px; margin-top: 20px; }
+.flash-sale-editor-actions button { flex: 1; }
+.flash-sale-price-input {
+  width: 116px;
+  min-width: 100px;
+  border: 1px solid var(--pcb-border);
+  border-radius: 7px;
+  padding: 8px 9px;
+  color: var(--pcb-text);
+  font: inherit;
+  font-size: 13px;
+}
+.flash-sale-price-input:focus { outline: 2px solid var(--pcb-blue-light); border-color: var(--pcb-blue); }
+.flash-sale-price-help { display: block; margin-top: 4px; color: var(--pcb-text-light); font-size: 10px; }
+.flash-sale-table { min-width: 900px; }
 .badge-count {
   background: #fde8e9;
   color: var(--pcb-danger);
@@ -444,6 +463,8 @@ body { background: var(--pcb-bg); }
   .admin-sidebar-storefront, .admin-logout-btn { width: auto; }
   .admin-main { padding: 20px 16px 50px; }
   .admin-table-wrap { max-height: 55vh; }
+  .flash-sale-panel-header { align-items: flex-start; gap: 12px; }
+  .flash-sale-editor-actions { flex-direction: column-reverse; }
   .stats-grid { grid-template-columns: 1fr 1fr; }
   .product-detail-layout, .product-detail-columns { grid-template-columns: 1fr; gap: 14px; }
   .product-detail-image { height: 190px; }

@@ -84,6 +84,11 @@ function publicUser(user) {
   return { id: user.id, name: user.name, email: user.email, age: user.age, address: user.address, phone: user.phone };
 }
 
+async function getFlashSaleEndTime() {
+  const [[setting]] = await pool.query("SELECT ends_at_ms AS endsAt FROM flash_sale_settings WHERE id = 1");
+  return setting?.endsAt === null || setting?.endsAt === undefined ? null : Number(setting.endsAt);
+}
+
 function normalizeImageName(value) {
   return String(value || "").toLowerCase().replace(/[^a-z0-9]/g, "");
 }
@@ -112,6 +117,14 @@ app.post("/api/admin/upload-image", requireAdmin, imageUpload.single("image"), (
 });
 
 // Public API
+app.get("/api/flash-sale", async (req, res, next) => {
+  try {
+    const endsAt = await getFlashSaleEndTime();
+    res.set("Cache-Control", "no-store");
+    res.json({ endsAt, active: endsAt !== null && endsAt > Date.now() });
+  } catch (err) { next(err); }
+});
+
 app.get("/api/categories", async (req, res, next) => {
   try {
     const [rows] = await pool.query("SELECT id, name, icon FROM categories ORDER BY name");
@@ -125,8 +138,15 @@ app.get("/api/products", async (req, res, next) => {
   const { category, search, flashSale } = req.query;
   const conditions = [];
   const params = [];
+  let campaignActive = false;
+  try {
+    const endsAt = await getFlashSaleEndTime();
+    campaignActive = endsAt !== null && endsAt > Date.now();
+  } catch (err) {
+    return next(err);
+  }
   if (category) { conditions.push("p.category_id = ?"); params.push(category); }
-  if (flashSale === "true") conditions.push("p.flash_sale = 1");
+  if (flashSale === "true") conditions.push(campaignActive ? "p.flash_sale = 1" : "1 = 0");
   if (search) {
     conditions.push("(p.title LIKE ? OR p.specs LIKE ?)");
     params.push(`%${search}%`, `%${search}%`);
@@ -135,10 +155,14 @@ app.get("/api/products", async (req, res, next) => {
   try {
     const [rows] = await pool.query(
       `SELECT p.id, p.title, p.category_id AS category, p.price, p.discount_price AS discountPrice,
+              p.sale_price AS salePrice,
               p.stock, p.sold, p.rating, p.flash_sale AS flashSale, p.specs, p.image
        FROM products p ${where} ORDER BY p.created_at DESC`, params
     );
-    res.json(rows);
+    res.json(rows.map((product) => ({
+      ...product,
+      flashSale: campaignActive && !!product.flashSale
+    })));
   } catch (err) { next(err); }
 });
 
@@ -146,10 +170,13 @@ app.get("/api/products/:id", async (req, res, next) => {
   try {
     const [rows] = await pool.query(
       `SELECT id, title, category_id AS category, price, discount_price AS discountPrice,
+              sale_price AS salePrice,
               stock, sold, rating, flash_sale AS flashSale, specs, image
        FROM products WHERE id = ?`, [req.params.id]
     );
     if (!rows[0]) return res.status(404).json({ error: "Product not found" });
+    const endsAt = await getFlashSaleEndTime();
+    rows[0].flashSale = endsAt !== null && endsAt > Date.now() && !!rows[0].flashSale;
     res.json(rows[0]);
   } catch (err) { next(err); }
 });
@@ -251,9 +278,33 @@ app.get("/api/admin/products", requireAdmin, async (req, res, next) => {
   try {
     const [rows] = await pool.query(`
       SELECT id, title, category_id AS category, price, discount_price AS discountPrice,
+             sale_price AS salePrice,
              stock, sold, rating, flash_sale AS flashSale, specs, image
       FROM products ORDER BY created_at DESC`);
     res.json(rows);
+  } catch (err) { next(err); }
+});
+
+app.get("/api/admin/flash-sale", requireAdmin, async (req, res, next) => {
+  try {
+    const endsAt = await getFlashSaleEndTime();
+    res.json({ endsAt, active: endsAt !== null && endsAt > Date.now() });
+  } catch (err) { next(err); }
+});
+
+app.put("/api/admin/flash-sale", requireAdmin, async (req, res, next) => {
+  const { endsAt } = req.body || {};
+  let endTime = null;
+  if (endsAt !== null && endsAt !== "") {
+    endTime = Number(endsAt);
+    if (!Number.isSafeInteger(endTime) || endTime <= Date.now()) {
+      return res.status(400).json({ error: "Choose a flash sale end time in the future." });
+    }
+  }
+
+  try {
+    await pool.query("UPDATE flash_sale_settings SET ends_at_ms = ? WHERE id = 1", [endTime]);
+    res.json({ endsAt: endTime, active: endTime !== null });
   } catch (err) { next(err); }
 });
 
@@ -306,21 +357,50 @@ app.post("/api/admin/products", requireAdmin, async (req, res, next) => {
 app.put("/api/admin/products/:id", requireAdmin, async (req, res, next) => {
   const body = req.body || {};
   try {
+    let salePrice = null;
+    const validatesPriceRelationship = body.salePrice !== undefined ||
+      body.price !== undefined || body.discountPrice !== undefined;
+    if (validatesPriceRelationship) {
+      if (body.salePrice !== null && body.salePrice !== "") {
+        if (body.salePrice !== undefined) salePrice = Number(body.salePrice);
+        if (salePrice !== null && (!Number.isFinite(salePrice) || salePrice <= 0)) {
+          return res.status(400).json({ error: "Sale price must be a positive amount or left blank." });
+        }
+      }
+      const [currentRows] = await pool.query(
+        "SELECT price, discount_price AS discountPrice, sale_price AS salePrice FROM products WHERE id = ?",
+        [req.params.id]
+      );
+      if (!currentRows[0]) return res.status(404).json({ error: "Product not found" });
+      const regularPrice = Number(body.price ?? currentRows[0].price);
+      const discountPrice = body.discountPrice !== undefined
+        ? (body.discountPrice === "" || body.discountPrice === null ? null : Number(body.discountPrice))
+        : Number(currentRows[0].discountPrice);
+      const productBasePrice = Number(discountPrice) || regularPrice;
+      const resultingSalePrice = body.salePrice === undefined ? Number(currentRows[0].salePrice) : salePrice;
+      if (Number.isFinite(resultingSalePrice) && resultingSalePrice > 0 &&
+          (!Number.isFinite(productBasePrice) || resultingSalePrice >= productBasePrice)) {
+        return res.status(400).json({ error: "Sale price must be lower than the product's regular selling price." });
+      }
+    }
     const [result] = await pool.query(`UPDATE products SET
       title = COALESCE(?, title), category_id = COALESCE(?, category_id), price = COALESCE(?, price),
       discount_price = CASE WHEN ? = 1 THEN ? ELSE discount_price END,
+      sale_price = CASE WHEN ? = 1 THEN ? ELSE sale_price END,
       stock = COALESCE(?, stock), sold = COALESCE(?, sold), rating = COALESCE(?, rating),
       flash_sale = COALESCE(?, flash_sale), specs = COALESCE(?, specs), image = COALESCE(?, image)
       WHERE id = ?`, [
       body.title, body.category, body.price !== undefined ? Number(body.price) : null,
       body.discountPrice !== undefined,
       body.discountPrice === undefined || body.discountPrice === "" ? null : Number(body.discountPrice),
+      body.salePrice !== undefined, salePrice,
       body.stock !== undefined ? Number(body.stock) : null, body.sold !== undefined ? Number(body.sold) : null,
       body.rating !== undefined ? Number(body.rating) : null, body.flashSale === undefined ? null : !!body.flashSale,
       body.specs, body.image, req.params.id
     ]);
     if (!result.affectedRows) return res.status(404).json({ error: "Product not found" });
     const [rows] = await pool.query(`SELECT id, title, category_id AS category, price, discount_price AS discountPrice,
+      sale_price AS salePrice,
       stock, sold, rating, flash_sale AS flashSale, specs, image FROM products WHERE id = ?`, [req.params.id]);
     res.json(rows[0]);
   } catch (err) { next(err); }
@@ -347,6 +427,10 @@ app.post("/api/orders", async (req, res, next) => {
   try {
     connection = await pool.getConnection();
     await connection.beginTransaction();
+    const [[saleSetting]] = await connection.query(
+      "SELECT ends_at_ms AS endsAt FROM flash_sale_settings WHERE id = 1"
+    );
+    const flashSaleActive = Number(saleSetting?.endsAt || 0) > Date.now();
     const orderItems = [];
     let subtotal = 0;
     for (const item of items) {
@@ -355,13 +439,16 @@ app.post("/api/orders", async (req, res, next) => {
         throw Object.assign(new Error("Invalid order item."), { status: 400 });
       }
       const [rows] = await connection.query(
-        `SELECT id, title, price, discount_price AS discountPrice, stock
+        `SELECT id, title, price, discount_price AS discountPrice, sale_price AS salePrice,
+                flash_sale AS flashSale, stock
          FROM products WHERE id = ? FOR UPDATE`, [item.productId]
       );
       const product = rows[0];
       if (!product) throw Object.assign(new Error("A product in your cart no longer exists."), { status: 400 });
       if (product.stock < quantity) throw Object.assign(new Error(`${product.title} has insufficient stock.`), { status: 409 });
-      const unitPrice = product.discountPrice || product.price;
+      const unitPrice = flashSaleActive && product.flashSale && Number(product.salePrice) > 0
+        ? Number(product.salePrice)
+        : Number(product.discountPrice) || Number(product.price);
       const lineTotal = unitPrice * quantity;
       subtotal += lineTotal;
       orderItems.push({ product, quantity, unitPrice, lineTotal });

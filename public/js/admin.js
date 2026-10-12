@@ -9,6 +9,7 @@
     categories: [],
     products: [],
     orders: [],
+    flashSaleEndsAt: null,
     editingId: null,
     deletingId: null
   };
@@ -31,6 +32,13 @@
     ordersTable: document.querySelector("#ordersTable tbody"),
     ordersBadge: document.getElementById("ordersBadge"),
     flashSaleTable: document.querySelector("#flashSaleTable tbody"),
+    flashSaleCountdown: document.getElementById("flashSaleCountdown"),
+    openFlashSaleEditor: document.getElementById("openFlashSaleEditor"),
+    flashSaleEditorModal: document.getElementById("flashSaleEditorModal"),
+    flashSaleForm: document.getElementById("flashSaleForm"),
+    flashSaleEndAt: document.getElementById("flashSaleEndAt"),
+    clearFlashSaleCountdown: document.getElementById("clearFlashSaleCountdown"),
+    saveFlashSaleCountdown: document.getElementById("saveFlashSaleCountdown"),
     openAddProductBtn: document.getElementById("openAddProductBtn"),
     categoryFilters: document.querySelectorAll(".category-filter"),
 
@@ -148,14 +156,16 @@
   // Bootstrap dashboard data
   async function bootstrapDashboard() {
     try {
-      const [categories, products, orders] = await Promise.all([
+      const [categories, products, orders, flashSale] = await Promise.all([
         fetch("/api/categories").then((r) => r.json()),
         api("/api/admin/products"),
-        api("/api/admin/orders")
+        api("/api/admin/orders"),
+        api("/api/admin/flash-sale")
       ]);
       state.categories = categories;
       state.products = products;
       state.orders = orders;
+      state.flashSaleEndsAt = flashSale.endsAt;
 
       populateCategorySelect();
       populateProductCategoryFilter();
@@ -164,6 +174,7 @@
       renderProductsTable();
       renderOrdersTable();
       renderFlashSaleTable();
+      updateFlashSaleCountdown();
     } catch (err) {
       showToast(err.message);
     }
@@ -172,7 +183,9 @@
   function startDashboardRefresh() {
     if (state.refreshTimer) return;
     state.refreshTimer = setInterval(() => {
-      if (!document.hidden && state.token && !el.productModal.classList.contains("open")) bootstrapDashboard();
+      if (!document.hidden && state.token && !el.productModal.classList.contains("open") &&
+          !el.flashSaleEditorModal.classList.contains("open") &&
+          !el.flashSaleTable.contains(document.activeElement)) bootstrapDashboard();
     }, 5000);
   }
 
@@ -370,7 +383,7 @@
   function renderFlashSaleTable() {
     const products = filteredProducts();
     if (products.length === 0) {
-      el.flashSaleTable.innerHTML = `<tr class="empty-row"><td colspan="5">No products available.</td></tr>`;
+      el.flashSaleTable.innerHTML = `<tr class="empty-row"><td colspan="6">No products available.</td></tr>`;
       return;
     }
 
@@ -385,8 +398,14 @@
           </div>
         </td>
         <td>${categoryName(p.category)}</td>
-        <td>${money(p.price)}</td>
-        <td>${p.discountPrice ? money(p.discountPrice) : "—"}</td>
+        <td>${money(p.discountPrice || p.price)}</td>
+        <td>
+          <input class="flash-sale-price-input" type="number" min="0.01" step="0.01"
+            value="${p.salePrice === null || p.salePrice === undefined ? "" : Number(p.salePrice)}"
+            aria-label="Flash sale price for ${escapeHtml(p.title)}" placeholder="Optional" />
+          <span class="flash-sale-price-help">Campaign only; blank uses normal price</span>
+        </td>
+        <td>${stockPill(Number(p.stock))}</td>
         <td>
           <label class="switch">
             <input type="checkbox" data-id="${p.id}" ${p.flashSale ? "checked" : ""} />
@@ -415,7 +434,117 @@
         }
       });
     });
+
+    el.flashSaleTable.querySelectorAll(".flash-sale-price-input").forEach((input, index) => {
+      const product = products[index];
+      input.addEventListener("change", async () => {
+        const value = input.value.trim();
+        const salePrice = value === "" ? null : Number(value);
+        const basePrice = Number(product.discountPrice) || Number(product.price);
+        if (salePrice !== null && (!Number.isFinite(salePrice) || salePrice <= 0 || salePrice >= basePrice)) {
+          showToast(`Sale price must be positive and lower than ${money(basePrice)}.`);
+          input.value = product.salePrice === null || product.salePrice === undefined ? "" : Number(product.salePrice);
+          return;
+        }
+
+        input.disabled = true;
+        try {
+          const updated = await api(`/api/admin/products/${product.id}`, {
+            method: "PUT",
+            body: JSON.stringify({ salePrice })
+          });
+          const idx = state.products.findIndex((item) => item.id === updated.id);
+          if (idx !== -1) state.products[idx] = updated;
+          renderFlashSaleTable();
+          renderProductsTable();
+          showToast(`Flash sale price ${salePrice === null ? "cleared" : "saved"} for "${truncate(updated.title, 30)}".`);
+        } catch (err) {
+          showToast(err.message);
+          input.disabled = false;
+          input.value = product.salePrice === null || product.salePrice === undefined ? "" : Number(product.salePrice);
+        }
+      });
+    });
   }
+
+  function toLocalDateTimeInput(timestamp) {
+    const date = new Date(timestamp);
+    date.setMinutes(date.getMinutes() - date.getTimezoneOffset());
+    return date.toISOString().slice(0, 16);
+  }
+
+  function updateFlashSaleCountdown() {
+    const remaining = Number(state.flashSaleEndsAt) - Date.now();
+    if (!state.flashSaleEndsAt) {
+      el.flashSaleCountdown.textContent = "No campaign countdown set";
+      return;
+    }
+    if (remaining <= 0) {
+      el.flashSaleCountdown.textContent = "Campaign ended";
+      return;
+    }
+    const days = Math.floor(remaining / 86400000);
+    const hours = Math.floor((remaining % 86400000) / 3600000);
+    const minutes = Math.floor((remaining % 3600000) / 60000);
+    const seconds = Math.floor((remaining % 60000) / 1000);
+    const clock = [hours, minutes, seconds].map((value) => String(value).padStart(2, "0")).join(":");
+    el.flashSaleCountdown.textContent = `Ends in ${days ? `${days}d ` : ""}${clock}`;
+  }
+
+  setInterval(updateFlashSaleCountdown, 1000);
+
+  el.openFlashSaleEditor.addEventListener("click", () => {
+    el.flashSaleEndAt.value = state.flashSaleEndsAt > Date.now()
+      ? toLocalDateTimeInput(state.flashSaleEndsAt)
+      : "";
+    el.flashSaleEndAt.min = toLocalDateTimeInput(Date.now() + 60000);
+    openModal("flashSaleEditorModal");
+    el.flashSaleEndAt.focus();
+  });
+
+  el.flashSaleForm.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    if (!el.flashSaleForm.reportValidity()) return;
+    const endsAt = new Date(el.flashSaleEndAt.value).getTime();
+    if (!Number.isSafeInteger(endsAt) || endsAt <= Date.now()) {
+      showToast("Choose a flash sale end time in the future.");
+      return;
+    }
+
+    el.saveFlashSaleCountdown.disabled = true;
+    try {
+      const config = await api("/api/admin/flash-sale", {
+        method: "PUT",
+        body: JSON.stringify({ endsAt })
+      });
+      state.flashSaleEndsAt = config.endsAt;
+      updateFlashSaleCountdown();
+      closeModal("flashSaleEditorModal");
+      showToast("Flash sale countdown saved.");
+    } catch (err) {
+      showToast(err.message);
+    } finally {
+      el.saveFlashSaleCountdown.disabled = false;
+    }
+  });
+
+  el.clearFlashSaleCountdown.addEventListener("click", async () => {
+    el.clearFlashSaleCountdown.disabled = true;
+    try {
+      const config = await api("/api/admin/flash-sale", {
+        method: "PUT",
+        body: JSON.stringify({ endsAt: null })
+      });
+      state.flashSaleEndsAt = config.endsAt;
+      updateFlashSaleCountdown();
+      closeModal("flashSaleEditorModal");
+      showToast("Flash sale campaign ended; normal prices are now active.");
+    } catch (err) {
+      showToast(err.message);
+    } finally {
+      el.clearFlashSaleCountdown.disabled = false;
+    }
+  });
 
   function truncate(str, n) {
     return str.length > n ? str.slice(0, n - 1) + "…" : str;
