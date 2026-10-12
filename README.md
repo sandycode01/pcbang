@@ -82,7 +82,11 @@ Customers open the standalone checker at `/compatibility.html`, also linked
 from the storefront category navigation. It retains the store header, category
 navigation, and footer while hosting the compatibility form on its own page.
 Each component picker is an expandable list with a product thumbnail, name, and
-stock status.
+stock status, plus the current selling price. Active Flash Sale items show
+their sale price; other items use the normal selling price, including any
+standard discount. Compatibility checks run automatically as components are
+selected. **Add to cart** adds each selected in-stock component to the existing
+browser cart; it does not require all five component types to be selected.
 
 To enter or update specifications, sign in at `/admin`, choose **Edit** for a
 component, expand **PC compatibility data**, and enter verified manufacturer
@@ -195,7 +199,8 @@ pcbang/
 - `GET /api/products/:id`
 - `GET /api/flash-sale` — current shared campaign end time and active state
 - `GET /api/pc-builder/products` — component choices and recorded compatibility
-  data for CPUs, motherboards, RAM, GPUs, and cases
+  data and current price fields (`price`, `discountPrice`, `salePrice`, and
+  campaign-aware `flashSale`) for CPUs, motherboards, RAM, GPUs, and cases
 - `POST /api/pc-builder/check` — accepts `{ cpuId, motherboardId, ramId, gpuId,
   caseId }`; selections may be omitted for partial checks. Returns `overall`
   (`compatible`, `incompatible`, or `incomplete`) and individual checks

@@ -1505,6 +1505,17 @@ img { max-width: 100%; display: block; }
 .pc-builder-option-info { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
 .pc-builder-option-info strong { overflow: hidden; font-size: 12px; line-height: 1.4; text-overflow: ellipsis; }
 .pc-builder-option-info small { color: var(--pcb-text-light); font-size: 11px; }
+.pc-builder-option-meta { display: flex; align-items: center; flex-wrap: wrap; gap: 4px 8px; }
+.pc-builder-option-info .pc-builder-option-price { color: var(--pcb-navy); font-size: 11px; white-space: nowrap; }
+.pc-builder-sale-badge {
+  padding: 2px 5px;
+  border-radius: 999px;
+  background: #fff1f2;
+  color: #be123c;
+  font-size: 9px;
+  font-weight: 700;
+  white-space: nowrap;
+}
 .pc-builder-actions {
   display: flex;
   align-items: center;

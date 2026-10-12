@@ -9,10 +9,23 @@
     caseId: document.getElementById("builderCase")
   };
   const results = document.getElementById("pcBuilderResults");
-  const checkButton = document.getElementById("checkPcCompatibility");
+  const addToCartButton = document.getElementById("addPcBuildToCart");
   const resetButton = document.getElementById("resetPcBuilder");
   const nav = document.getElementById("categoryNavStrip");
   let requestVersion = 0;
+  let productsById = new Map();
+
+  function money(value) {
+    return "₱" + Number(value).toLocaleString("en-PH", {
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0
+    });
+  }
+
+  function effectivePrice(product) {
+    if (product.flashSale && Number(product.salePrice) > 0) return Number(product.salePrice);
+    return Number(product.discountPrice) || Number(product.price);
+  }
 
   function createProductImage(product) {
     const frame = document.createElement("span");
@@ -70,7 +83,19 @@
       title.textContent = product.title;
       const stock = document.createElement("small");
       stock.textContent = Number(product.stock) > 0 ? `${product.stock} in stock` : "Out of stock";
-      info.append(title, stock);
+      const meta = document.createElement("span");
+      meta.className = "pc-builder-option-meta";
+      const price = document.createElement("strong");
+      price.className = "pc-builder-option-price";
+      price.textContent = money(effectivePrice(product));
+      meta.append(stock, price);
+      if (product.flashSale && Number(product.salePrice) > 0) {
+        const badge = document.createElement("span");
+        badge.className = "pc-builder-sale-badge";
+        badge.textContent = "Flash Sale";
+        meta.append(badge);
+      }
+      info.append(title, meta);
       button.append(image, info);
 
       button.addEventListener("click", () => {
@@ -133,7 +158,6 @@
     }
 
     const version = ++requestVersion;
-    checkButton.disabled = true;
     try {
       const response = await fetch("/api/pc-builder/check", {
         method: "POST",
@@ -175,19 +199,53 @@
       results.append(list);
     } catch (error) {
       if (version === requestVersion) showMessage(error.message, "error");
-    } finally {
-      if (version === requestVersion) checkButton.disabled = false;
     }
   }
 
-  checkButton.addEventListener("click", checkCompatibility);
+  function addSelectedProductsToCart() {
+    const selectedProducts = Object.values(selects)
+      .map((select) => productsById.get(select.value))
+      .filter(Boolean);
+    if (!selectedProducts.length) {
+      showMessage("Choose at least one component before adding it to your cart.", "error");
+      return;
+    }
+
+    let cart;
+    try {
+      cart = JSON.parse(localStorage.getItem("pcbang_cart") || "[]");
+      if (!Array.isArray(cart)) throw new Error("Cart data is invalid.");
+    } catch {
+      showMessage("Your saved cart could not be read. Open the storefront and clear or repair the cart before continuing.", "error");
+      return;
+    }
+
+    const quantityById = new Map(cart.map((item) => [item.id, Number(item.qty) || 0]));
+    for (const product of selectedProducts) {
+      const updatedQuantity = (quantityById.get(product.id) || 0) + 1;
+      if (updatedQuantity > Number(product.stock)) {
+        showMessage(`Only ${product.stock} of "${product.title}" are in stock. Remove it or adjust your cart before adding this build.`, "error");
+        return;
+      }
+      quantityById.set(product.id, updatedQuantity);
+    }
+
+    try {
+      const updatedCart = [...quantityById].map(([id, qty]) => ({ id, qty }));
+      localStorage.setItem("pcbang_cart", JSON.stringify(updatedCart));
+      showMessage(`${selectedProducts.length} selected ${selectedProducts.length === 1 ? "component was" : "components were"} added to your cart.`, "compatible");
+    } catch {
+      showMessage("Your cart could not be saved in this browser. Check available browser storage and try again.", "error");
+    }
+  }
+
+  addToCartButton.addEventListener("click", addSelectedProductsToCart);
   resetButton.addEventListener("click", () => {
     Object.values(selects).forEach((select) => {
       select.value = "";
       select.dispatchEvent(new Event("change"));
     });
     requestVersion += 1;
-    checkButton.disabled = false;
     showMessage("Select components to see compatibility results.");
   });
   Object.values(selects).forEach((select) => {
@@ -208,6 +266,7 @@
         categoriesResponse.json(),
         productsResponse.json()
       ]);
+      productsById = new Map(products.map((product) => [product.id, product]));
       renderCategories(categories);
       populateSelect(selects.cpuId, products, "cpu", "Choose a processor");
       populateSelect(selects.motherboardId, products, "mobo", "Choose a motherboard");
@@ -218,7 +277,7 @@
     .catch((error) => {
       console.error("Failed to initialize compatibility checker:", error);
       Object.values(selects).forEach((select) => { select.disabled = true; });
-      checkButton.disabled = true;
+      addToCartButton.disabled = true;
       resetButton.disabled = true;
       showMessage(error.message, "error");
     });

@@ -295,8 +295,12 @@ app.get("/api/products/:id", async (req, res, next) => {
 
 app.get("/api/pc-builder/products", async (req, res, next) => {
   try {
+    const endsAt = await getFlashSaleEndTime();
+    const flashSaleActive = endsAt !== null && endsAt > Date.now();
     const [rows] = await pool.query(`
-      SELECT p.id, p.title, p.category_id AS category, p.price, p.stock, p.image,
+      SELECT p.id, p.title, p.category_id AS category, p.price,
+             p.discount_price AS discountPrice, p.sale_price AS salePrice,
+             p.flash_sale AS flashSale, p.stock, p.image,
              c.name AS categoryName,
              pc.cpu_socket AS compatibilityCpuSocket, pc.memory_type AS compatibilityMemoryType,
              pc.motherboard_form_factor AS compatibilityMotherboardFormFactor,
@@ -309,7 +313,10 @@ app.get("/api/pc-builder/products", async (req, res, next) => {
       WHERE p.category_id IN ('cpu', 'mobo', 'ram', 'gpu', 'case')
       ORDER BY p.category_id, p.title`);
     res.json(rows.map((row) => {
-      const product = serializeProduct(row);
+      const product = serializeProduct({
+        ...row,
+        flashSale: flashSaleActive && !!row.flashSale
+      });
       product.image = resolveCatalogImage({ ...product, category: row.categoryName });
       delete product.categoryName;
       return product;
