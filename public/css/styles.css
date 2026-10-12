@@ -1586,6 +1586,20 @@ img { max-width: 100%; display: block; }
   font-weight: 750;
 }
 
+.clear-selections {
+  width: 100%;
+  background: whitesmoke;
+  color: black;
+  border: none;
+  padding: 12px;
+  border-radius: var(--radius-md);
+  font-size: 14.5px;
+  font-weight: 700;
+  transition: background 0.15s ease;
+}
+
+.clear-selections:hover { background: var(--pcb-orange-light); color: white; }
+
 .auth-switch-btn:hover { text-decoration: underline; }
 
 .order-summary-box {
