@@ -1,5 +1,5 @@
 const mysql = require("mysql2/promise");
-const { categories, getProducts } = require("./data");
+const { categories, getProducts, productCompatibility } = require("./data");
 
 const pool = mysql.createPool({
   host: process.env.DB_HOST || "127.0.0.1",
@@ -43,6 +43,19 @@ async function initializeDatabase() {
       await connection.query("ALTER TABLE products ADD COLUMN sale_price DECIMAL(12,2) NULL AFTER discount_price");
     }
     await connection.query(`
+      CREATE TABLE IF NOT EXISTS product_compatibility (
+        product_id VARCHAR(32) PRIMARY KEY,
+        cpu_socket VARCHAR(40) NULL,
+        memory_type VARCHAR(20) NULL,
+        motherboard_form_factor VARCHAR(40) NULL,
+        supported_form_factors VARCHAR(200) NULL,
+        gpu_length_mm SMALLINT UNSIGNED NULL,
+        max_gpu_length_mm SMALLINT UNSIGNED NULL,
+        updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        CONSTRAINT fk_product_compatibility_product FOREIGN KEY (product_id)
+          REFERENCES products(id) ON DELETE CASCADE
+      )`);
+    await connection.query(`
       CREATE TABLE IF NOT EXISTS flash_sale_settings (
         id TINYINT UNSIGNED PRIMARY KEY,
         ends_at_ms BIGINT UNSIGNED NULL
@@ -77,6 +90,21 @@ async function initializeDatabase() {
       products.flatMap((product) => [
         product.id, product.title, product.category, product.price, product.discountPrice,
         product.stock, product.sold, product.rating, product.flashSale, product.specs, product.image
+      ])
+    );
+    await connection.query(
+      `INSERT IGNORE INTO product_compatibility
+       (product_id, cpu_socket, memory_type, motherboard_form_factor,
+        supported_form_factors, gpu_length_mm, max_gpu_length_mm)
+       VALUES ${productCompatibility.map(() => "(?, ?, ?, ?, ?, ?, ?)").join(",")}`,
+      productCompatibility.flatMap((item) => [
+        item.productId,
+        item.cpuSocket || null,
+        item.memoryType || null,
+        item.motherboardFormFactor || null,
+        item.supportedFormFactors?.join(", ") || null,
+        item.gpuLengthMm || null,
+        item.maxGpuLengthMm || null
       ])
     );
   } finally {

@@ -28,6 +28,18 @@ CREATE TABLE IF NOT EXISTS products (
   FULLTEXT INDEX idx_products_search (title, specs)
 );
 
+CREATE TABLE IF NOT EXISTS product_compatibility (
+  product_id VARCHAR(32) PRIMARY KEY,
+  cpu_socket VARCHAR(40) NULL,
+  memory_type VARCHAR(20) NULL,
+  motherboard_form_factor VARCHAR(40) NULL,
+  supported_form_factors VARCHAR(200) NULL,
+  gpu_length_mm SMALLINT UNSIGNED NULL,
+  max_gpu_length_mm SMALLINT UNSIGNED NULL,
+  updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  CONSTRAINT fk_product_compatibility_product FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE CASCADE
+);
+
 CREATE TABLE IF NOT EXISTS flash_sale_settings (
   id TINYINT UNSIGNED PRIMARY KEY,
   ends_at_ms BIGINT UNSIGNED NULL

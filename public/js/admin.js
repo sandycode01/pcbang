@@ -56,6 +56,12 @@
     pfImageHelp: document.getElementById("pfImageHelp"),
     pfRating: document.getElementById("pfRating"),
     pfSpecs: document.getElementById("pfSpecs"),
+    pfCpuSocket: document.getElementById("pfCpuSocket"),
+    pfMemoryType: document.getElementById("pfMemoryType"),
+    pfMotherboardFormFactor: document.getElementById("pfMotherboardFormFactor"),
+    pfSupportedFormFactors: document.getElementById("pfSupportedFormFactors"),
+    pfGpuLengthMm: document.getElementById("pfGpuLengthMm"),
+    pfMaxGpuLengthMm: document.getElementById("pfMaxGpuLengthMm"),
 
     deleteModal: document.getElementById("deleteModal"),
     deleteModalDesc: document.getElementById("deleteModalDesc"),
@@ -585,6 +591,13 @@
       : "Choose an image from your computer. Existing image stays when no new file is selected.";
     el.pfRating.value = product ? product.rating : 4.5;
     el.pfSpecs.value = product ? product.specs : "";
+    const compatibility = product?.compatibility || {};
+    el.pfCpuSocket.value = compatibility.cpuSocket || "";
+    el.pfMemoryType.value = compatibility.memoryType || "";
+    el.pfMotherboardFormFactor.value = compatibility.motherboardFormFactor || "";
+    el.pfSupportedFormFactors.value = (compatibility.supportedFormFactors || []).join(", ");
+    el.pfGpuLengthMm.value = compatibility.gpuLengthMm || "";
+    el.pfMaxGpuLengthMm.value = compatibility.maxGpuLengthMm || "";
     openModal("productModal");
   }
 
@@ -599,7 +612,15 @@
       discountPrice: el.pfDiscountPrice.value ? Number(el.pfDiscountPrice.value) : null,
       image: el.pfImage.value,
       rating: el.pfRating.value ? Number(el.pfRating.value) : 4.5,
-      specs: el.pfSpecs.value.trim()
+      specs: el.pfSpecs.value.trim(),
+      compatibility: {
+        cpuSocket: el.pfCpuSocket.value.trim(),
+        memoryType: el.pfMemoryType.value.trim(),
+        motherboardFormFactor: el.pfMotherboardFormFactor.value.trim(),
+        supportedFormFactors: el.pfSupportedFormFactors.value.trim(),
+        gpuLengthMm: el.pfGpuLengthMm.value ? Number(el.pfGpuLengthMm.value) : null,
+        maxGpuLengthMm: el.pfMaxGpuLengthMm.value ? Number(el.pfMaxGpuLengthMm.value) : null
+      }
     };
 
     try {

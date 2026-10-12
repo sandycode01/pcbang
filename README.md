@@ -16,6 +16,9 @@ category preferences, and recent searches remain browser-local.
   scrollable deals feed (discount %, price, stock meter)
 - Category grid and navigation (Processors, Graphics Cards, Motherboards, RAM,
   Storage, PSUs, Cases, Cooling, Peripherals, Laptops)
+- PC Component Compatibility Checker for CPU/motherboard socket, motherboard/RAM
+  generation, motherboard/case form-factor support, and graphics-card/case
+  clearance. Missing specifications are reported as unverified.
 - Slide-out storefront filters with category selection and minimum/maximum price
   ranges; filters can be combined to narrow the product feed
 - Personalized "Just For You" product feed showing up to 15 ranked products
@@ -37,7 +40,8 @@ category preferences, and recent searches remain browser-local.
 - Hardcoded login (`admin` / `admin123`) — session token stored in `sessionStorage`
 - Overview: total products, mock total sales, active categories, low-stock alerts
 - Product Management: full CRUD table (add / edit / delete) with a form for
-  title, category, price, discount price, stock, rating, specs, and icon
+  title, category, price, discount price, stock, rating, specs, image, and
+  optional compatibility data
 - Customer Orders: newest-first order list with order number, customer, delivery
   destination, contact number, payment method, total, status, and date ordered
 - Flash Sale Management: toggle products into the sale, set an independent sale
@@ -67,6 +71,23 @@ Then open:
 - Admin dashboard: http://localhost:3000/admin (login: `admin` / `admin123`)
 
 The server runs on port `3000` by default; set `PORT` to change it.
+
+## PC component compatibility data
+
+The app adds a one-to-one `product_compatibility` table and creates it
+automatically at server startup. This is an additive migration: it does not
+recreate the database, alter existing product/order rows, or remove the Docker
+database volume. Starter values are inserted only for products that do not
+already have compatibility data.
+
+To enter or update specifications, sign in at `/admin`, choose **Edit** for a
+component, expand **PC compatibility data**, and enter verified manufacturer
+details. Use the same socket notation on CPUs and motherboards (for example,
+`AM5`), `DDR4`/`DDR5` for memory type, and comma-separated supported board
+sizes for cases. GPU length and case clearance are whole millimeters. Leave
+unknown values blank; a blank value is not treated as proof of compatibility.
+The demo does not check BIOS support, power-supply capacity, cooler fit, or
+other compatibility factors.
 
 ## Run with Docker Desktop
 
@@ -169,6 +190,11 @@ pcbang/
 - `GET /api/products` — supports `?category=`, `?search=`, `?flashSale=true`
 - `GET /api/products/:id`
 - `GET /api/flash-sale` — current shared campaign end time and active state
+- `GET /api/pc-builder/products` — component choices and recorded compatibility
+  data for CPUs, motherboards, RAM, GPUs, and cases
+- `POST /api/pc-builder/check` — accepts `{ cpuId, motherboardId, ramId, gpuId,
+  caseId }`; selections may be omitted for partial checks. Returns `overall`
+  (`compatible`, `incompatible`, or `incomplete`) and individual checks
 
 **Customer accounts** (account routes require `Authorization: Bearer <token>`)
 - `POST /api/auth/signup` — `{ name, email, password, age, address, phone }`

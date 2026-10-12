@@ -113,6 +113,19 @@ let products = [
 
 let nextIdCounter = products.length + 1;
 
+const productCompatibility = [
+  { productId: "p1", cpuSocket: "AM5" },
+  { productId: "p2", cpuSocket: "LGA1700" },
+  { productId: "p3", cpuSocket: "AM4" },
+  { productId: "p4", cpuSocket: "LGA1700" },
+  { productId: "p9", cpuSocket: "AM5", memoryType: "DDR5", motherboardFormFactor: "ATX" },
+  { productId: "p10", cpuSocket: "LGA1700", memoryType: "DDR5", motherboardFormFactor: "ATX" },
+  { productId: "p11", cpuSocket: "AM4", memoryType: "DDR4", motherboardFormFactor: "Micro-ATX" },
+  { productId: "p12", memoryType: "DDR5" },
+  { productId: "p13", memoryType: "DDR4" },
+  { productId: "p14", memoryType: "DDR5" }
+];
+
 function generateId() {
   return "p" + nextIdCounter++;
 }
@@ -120,6 +133,7 @@ function generateId() {
 module.exports = {
   categories,
   getProducts: () => products,
+  productCompatibility,
   setProducts: (newProducts) => { products = newProducts; },
   generateId
 };

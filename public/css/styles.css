@@ -1379,6 +1379,66 @@ img { max-width: 100%; display: block; }
   border-color: var(--pcb-blue);
 }
 
+.pc-builder-panel {
+  padding: 22px;
+  border: 1px solid var(--pcb-border);
+  border-radius: var(--radius-lg);
+  background: var(--pcb-white);
+  box-shadow: var(--shadow-sm);
+}
+
+.pc-builder-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0 16px;
+}
+
+.pc-builder-grid .form-group { min-width: 0; }
+.pc-builder-grid select { min-height: 42px; }
+.pc-builder-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding-top: 2px;
+}
+.pc-builder-actions p { margin: 0; color: var(--pcb-text-light); font-size: 12px; line-height: 1.5; }
+.pc-builder-actions > div { display: flex; flex: 0 0 auto; gap: 10px; }
+.pc-builder-actions button { width: auto; padding: 10px 14px; font-size: 13px; }
+.pc-builder-results { margin-top: 18px; }
+.pc-builder-summary {
+  padding: 12px 14px;
+  border: 1px solid var(--pcb-border);
+  border-left: 4px solid var(--pcb-text-light);
+  border-radius: var(--radius-sm);
+  background: #f8fafc;
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.5;
+}
+.pc-builder-summary.compatible { border-left-color: var(--pcb-success); background: #f0fdf4; color: #166534; }
+.pc-builder-summary.incompatible, .pc-builder-summary.error { border-left-color: var(--pcb-danger); background: #fff1f2; color: #9f1239; }
+.pc-builder-summary.incomplete { border-left-color: var(--pcb-orange); background: #fff7ed; color: #9a3412; }
+.pc-builder-check-list { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin-top: 12px; }
+.pc-builder-check {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 12px;
+  border: 1px solid var(--pcb-border);
+  border-radius: var(--radius-sm);
+  background: #fff;
+  font-size: 12px;
+  line-height: 1.5;
+}
+.pc-builder-check strong { color: var(--pcb-navy); }
+.pc-builder-check span { color: var(--pcb-text-light); }
+.pc-builder-check.compatible { border-left: 3px solid var(--pcb-success); }
+.pc-builder-check.incompatible { border-left: 3px solid var(--pcb-danger); }
+.pc-builder-check.unknown { border-left: 3px solid var(--pcb-orange); }
+.pc-builder-empty { margin: 12px 0 0; color: var(--pcb-text-light); font-size: 13px; }
+.pc-builder-actions button:disabled { cursor: wait; opacity: 0.65; }
+
 .form-row { display: flex; gap: 12px; }
 .form-row .form-group { flex: 1; }
 
@@ -1478,6 +1538,7 @@ img { max-width: 100%; display: block; }
   .category-grid { grid-template-columns: repeat(4, 1fr); }
   .promo-strip { grid-template-columns: 1fr; }
   .flash-sale-header { flex-direction: column; align-items: flex-start; }
+  .pc-builder-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 
 @media (max-width: 600px) {
@@ -1496,6 +1557,11 @@ img { max-width: 100%; display: block; }
   .storefront-detail-main, .detail-info-grid { grid-template-columns: 1fr; gap: 14px; }
   .storefront-detail-image { height: 190px; }
   .related-product-grid { grid-template-columns: repeat(2, 1fr); }
+  .pc-builder-panel { padding: 16px; }
+  .pc-builder-grid, .pc-builder-check-list { grid-template-columns: 1fr; }
+  .pc-builder-actions { align-items: stretch; flex-direction: column; }
+  .pc-builder-actions > div { width: 100%; }
+  .pc-builder-actions button { flex: 1; }
 }
 
 @media (max-width: 420px) {
