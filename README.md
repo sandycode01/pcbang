@@ -1,7 +1,7 @@
 # PCBang — Online Store for PC Parts & Accessories
 
 A fully functional e-commerce demo app built with **Node.js + Express** on the
-back end and **vanilla HTML/CSS/JS** on the front end, styled after modern
+back-end and **vanilla HTML/CSS/JS** on the front end, styled after modern
 marketplaces like Lazada PH but focused exclusively on PC components.
 
 MySQL stores the catalog, customer accounts, persistent login sessions, orders,
@@ -19,7 +19,7 @@ category preferences, and recent searches remain browser-local.
   Storage, PSUs, Cases, Cooling, Peripherals, Laptops)
 - Slide-out storefront filters with category selection and minimum/maximum price
   ranges; filters can be combined to narrow the product feed
-- Personalized "Just For You" product feed showing up to 15 ranked products
+- Personalized "Just For You" product feed showing up to 13 ranked products
   based on cart items, recently viewed items, previous searches, and category
   preferences; includes category filter pills, ratings, sold counts, and stock
   badges
