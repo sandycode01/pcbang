@@ -36,7 +36,11 @@ category preferences, and recent searches remain browser-local.
 
 **Admin dashboard (`/admin`)**
 - Hardcoded login (`admin` / `admin123`) — session token stored in `sessionStorage`
-- Overview: total products, mock total sales, active categories, low-stock alerts
+- Overview: total products, estimated sales based on sold counts and regular
+  discount prices, active categories, and low-stock alerts
+- Overview, Product Management, and Flash Sale each have an independent category
+  filter. The Overview filter applies to its low-stock table and alert count;
+  the other filters only affect their own tables
 - Product Management: full CRUD table (add / edit / delete) with a form for
   title, category, price, discount price, stock, rating, specs, image, and
   optional compatibility data
@@ -46,29 +50,42 @@ category preferences, and recent searches remain browser-local.
   price, view stock, and manage a shared live campaign countdown. Sale prices
   automatically stop applying when the campaign expires; each product then
   returns to its regular selling price (including any standard discount)
+- Admin-uploaded product images are stored in a persistent Docker volume when
+  using Docker Compose
 - Admin data tables have a viewport-limited height and independent scrolling;
   column headers remain visible while scrolling, and the height limit adjusts
   for smaller screens
 
-## Getting Started
+## Getting started
 
-```bash
-npm install
-npm run db:init
-npm start
-```
+**Recommended: Docker Desktop.** This starts the app and MySQL together and
+keeps the database and uploaded images in Docker volumes. Follow
+[Run with Docker Desktop](#run-with-docker-desktop) below.
 
-Start MySQL through XAMPP first, then import `database.sql` in phpMyAdmin. Copy
-`.env.example` to
-`.env` and change the `DB_*` values when your XAMPP credentials differ from the
-defaults (`root` with no password). The schema import and seed are idempotent
-and only insert starter rows that do not already exist.
+**Alternative: run Node.js with a local MySQL server (such as XAMPP).**
 
-Then open:
-- Storefront: http://localhost:3000/
-- Admin dashboard: http://localhost:3000/admin (login: `admin` / `admin123`)
+1. Install Node.js and start MySQL in XAMPP.
+2. Create the database schema once. Either import `database.sql` in
+   phpMyAdmin, or run `npm run db:init` from PowerShell if the MySQL command-line
+   client is installed. Use one method, not both.
+3. Copy `.env.example` to `.env`. For a default XAMPP setup, set `DB_HOST` to
+   `localhost`, `DB_USER` to `root`, and `DB_PASSWORD` to the password configured
+   for that MySQL user (often blank in a local XAMPP installation).
+   `MYSQL_ROOT_PASSWORD` is only used by Docker Compose.
+4. From the project folder, install dependencies and start the app:
 
-The server runs on port `3000` by default; set `PORT` to change it.
+   ```powershell
+   npm install
+   npm start
+   ```
+
+5. Open `http://localhost:3000/` for the storefront or
+   `http://localhost:3000/admin` for the admin dashboard.
+
+The app listens on port `3000` by default; set `PORT` to use a different port.
+On startup, it creates supported additive tables/columns and inserts starter
+catalog rows only when they are missing. Back up your database before making
+manual schema changes or resetting it.
 
 ## PC component compatibility data
 
@@ -84,9 +101,10 @@ navigation, and footer while hosting the compatibility form on its own page.
 Each component picker is an expandable list with a product thumbnail, name, and
 stock status, plus the current selling price. Active Flash Sale items show
 their sale price; other items use the normal selling price, including any
-standard discount. Compatibility checks run automatically as components are
-selected. **Add to cart** adds each selected in-stock component to the existing
-browser cart; it does not require all five component types to be selected.
+standard discount. Compatibility checks run automatically after at least two
+components are selected. **Add to cart** adds each selected in-stock component
+to the existing browser cart; it does not require all five component types to
+be selected. Checkout recalculates prices and checks stock on the server.
 
 To enter or update specifications, sign in at `/admin`, choose **Edit** for a
 component, expand **PC compatibility data**, and enter verified manufacturer
@@ -99,12 +117,12 @@ other compatibility factors.
 
 ## Run with Docker Desktop
 
-Docker Compose runs the Express app and MySQL in separate containers. The MySQL
-database files are kept in a named Docker volume, so restarting or rebuilding
-the containers does not erase the database.
+Docker Compose runs the Express app and MySQL in separate containers. MySQL
+data and admin-uploaded product images are kept in named Docker volumes, so
+rebuilding or replacing the app container does not erase them.
 
-1. Install Git for Windows and Docker Desktop, then open Docker Desktop and wait
-   until its engine is running.
+1. Install Docker Desktop and wait until its engine is running. Git for Windows
+   is optional for running the app, but is needed for the Git instructions below.
 2. In PowerShell, go to this project directory:
 
    ```powershell
@@ -118,10 +136,10 @@ the containers does not erase the database.
    notepad .env
    ```
 
-   Replace the example values for both `DB_PASSWORD` and
-   `MYSQL_ROOT_PASSWORD` with local development passwords. Compose overrides
-   `DB_HOST` to `db` and connects the app as the dedicated `pcbang` MySQL user.
-   Do not commit `.env`.
+   Replace the example values for `DB_PASSWORD` and `MYSQL_ROOT_PASSWORD` with
+   two local development passwords of your choice. They do not need to match
+   your XAMPP passwords. Compose connects the app to the `db` service using a
+   dedicated `pcbang` user; leave `DB_HOST` as `db`. Do not commit `.env`.
 4. Build the app image and start both services:
 
    ```powershell
@@ -130,9 +148,12 @@ the containers does not erase the database.
 
    The app waits for MySQL to become healthy. The first database container
    startup imports `database.sql`, then the app seeds its starter catalog.
-5. Open `http://localhost:3000/` or `http://localhost:3000/admin`. Stop the
-   containers with `Ctrl+C`, or run `docker compose down` in another terminal.
-   Start again later with `docker compose up`.
+5. Open `http://localhost:3000/` for the storefront or
+   `http://localhost:3000/admin` for the admin dashboard. The demo admin login is
+   `admin` / `admin123`.
+6. Stop the services with `Ctrl+C` if Compose is running in the foreground, or
+   run `docker compose down` in another terminal. Start them later with
+   `docker compose up -d`.
 
 The database volume survives `docker compose down`. `docker compose down -v`
 deletes both the database and uploaded-image volumes; only use it when you
@@ -147,6 +168,9 @@ change, or restore them from a backup.
 To back up uploaded images, copy the `product_uploads` volume using Docker
 Desktop's volume tools or a Docker volume backup procedure. Avoid deleting
 volumes when removing containers; use `docker compose down` without `-v`.
+When running the app directly with `npm start` instead of Docker, uploads are
+written to the project-level `uploads/` folder. That folder is excluded from
+Git, so back it up separately.
 
 ## Git version control
 
@@ -160,8 +184,10 @@ git status
 git commit -m "Initial commit"
 ```
 
-Check `git status` before committing; `.gitignore` excludes `node_modules/` and
-`.env`. For each change, create a branch, commit your work, and merge it back:
+Check `git status` before committing; `.gitignore` excludes dependencies,
+local environment files, and the local `uploads/` directory. Docker volumes
+are not tracked in Git. For each change, create a branch, commit your work, and
+merge it back:
 
 ```powershell
 git switch -c feature/my-change
@@ -182,36 +208,50 @@ URL with `git remote add origin <repository-url>` and push with
 
 ```
 pcbang/
-├── server.js              # Express server + REST API (public & admin)
-├── data.js                 # Starter catalog used to seed MySQL
-├── database.sql             # MySQL schema and table definitions
-├── db.js                    # MySQL pool and idempotent seed
+├── server.js                # Express server, APIs, and uploaded-image handling
+├── data.js                  # Starter catalog and compatibility data
+├── database.sql             # Initial MySQL schema
+├── db.js                    # MySQL connection, additive migrations, and seed
+├── Dockerfile               # App container build
+├── compose.yaml              # App, MySQL, and persistent volume configuration
+├── .env.example              # Local environment-variable template
+├── .dockerignore             # Excludes local files from the app image build
+├── .gitignore                # Excludes dependencies, secrets, and local uploads
 ├── package.json
 └── public/
-    ├── store.html           # Storefront page
-    ├── admin.html           # Admin login + dashboard page
+    ├── store.html            # Storefront page
+    ├── admin.html            # Admin login and dashboard
+    ├── compatibility.html    # Standalone PC compatibility checker
+    ├── img/                  # Bundled sample product images
     ├── css/
     │   ├── styles.css        # Storefront styles (also shared tokens)
     │   └── admin.css         # Admin-only styles
     └── js/
         ├── icons.js           # Shared inline-SVG icon set
-        ├── app.js             # Storefront logic (accounts, cart, search, checkout…)
-        └── admin.js           # Admin logic (auth, products, orders, stats)
+        ├── app.js             # Storefront, account, cart, and checkout logic
+        ├── admin.js           # Admin dashboard logic
+        └── compatibility.js   # Compatibility checker logic
 ```
 
 ## API Reference
 
 **Public**
 - `GET /api/categories`
-- `GET /api/products` — supports `?category=`, `?search=`, `?flashSale=true`
+- `GET /api/products` — supports `?category=<id>`, `?search=<text>`, and
+  `?flashSale=true`. Product responses include regular, standard-discount, and
+  flash-sale prices; `flashSale` is true only while the shared campaign is active
 - `GET /api/products/:id`
 - `GET /api/flash-sale` — current shared campaign end time and active state
+- `GET /uploads/<category>/<filename>` — serves an uploaded product image
 - `GET /api/pc-builder/products` — component choices and recorded compatibility
   data and current price fields (`price`, `discountPrice`, `salePrice`, and
   campaign-aware `flashSale`) for CPUs, motherboards, RAM, GPUs, and cases
 - `POST /api/pc-builder/check` — accepts `{ cpuId, motherboardId, ramId, gpuId,
   caseId }`; selections may be omitted for partial checks. Returns `overall`
   (`compatible`, `incompatible`, or `incomplete`) and individual checks
+
+Protected customer and admin requests use a bearer token returned by the
+corresponding login endpoint in the `Authorization` header.
 
 **Customer accounts** (account routes require `Authorization: Bearer <token>`)
 - `POST /api/auth/signup` — `{ name, email, password, age, address, phone }`
@@ -225,6 +265,8 @@ pcbang/
 - `GET /api/admin/products`
 - `GET /api/admin/orders` — customer and order summary, newest first
 - `GET /api/admin/flash-sale`
+- `POST /api/admin/upload-image` — multipart field `image`; accepts PNG, JPEG,
+  WEBP, or GIF files up to 5 MB. Returns the persistent image URL
 - `PUT /api/admin/flash-sale` — `{ endsAt }` as a future Unix timestamp in
   milliseconds, or `{ endsAt: null }` to end the campaign immediately
 - `POST /api/admin/products`
