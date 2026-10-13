@@ -135,10 +135,18 @@ the containers does not erase the database.
    Start again later with `docker compose up`.
 
 The database volume survives `docker compose down`. `docker compose down -v`
-deletes that volume and all database data; only use it when you intentionally
-want to reset the local database. The SQL initialization script only runs when
-the MySQL data volume is empty. User-uploaded images currently live in the app
-container and are not persisted when that container is replaced.
+deletes both the database and uploaded-image volumes; only use it when you
+intentionally want to remove all local data. The SQL initialization script only
+runs when the MySQL data volume is empty. New admin image uploads are saved in
+the `product_uploads` named Docker volume and served from `/uploads/`, so they
+survive app image rebuilds and container replacement. Existing image files
+previously uploaded under `public/img/` are not automatically recoverable if
+their app container has already been replaced; upload them again after this
+change, or restore them from a backup.
+
+To back up uploaded images, copy the `product_uploads` volume using Docker
+Desktop's volume tools or a Docker volume backup procedure. Avoid deleting
+volumes when removing containers; use `docker compose down` without `-v`.
 
 ## Git version control
 

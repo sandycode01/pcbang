@@ -9,6 +9,8 @@ services:
       DB_HOST: db
       DB_USER: pcbang
       PORT: "3000"
+    volumes:
+      - product_uploads:/app/uploads
     depends_on:
       db:
         condition: service_healthy
@@ -33,3 +35,4 @@ services:
 
 volumes:
   mysql_data:
+  product_uploads:

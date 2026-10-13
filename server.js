@@ -11,15 +11,24 @@ const { pool, initializeDatabase } = require("./db");
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+const UPLOADS_DIR = path.join(__dirname, "uploads");
 
 app.use(express.json());
+fs.mkdirSync(UPLOADS_DIR, { recursive: true });
+app.use("/uploads", express.static(UPLOADS_DIR));
 app.use(express.static(path.join(__dirname, "public")));
+
+function normalizeUploadCategory(category) {
+  return String(category || "Uncategorized")
+    .trim()
+    .replace(/[^a-zA-Z0-9_-]+/g, "-")
+    .replace(/^-+|-+$/g, "") || "Uncategorized";
+}
 
 const imageUpload = multer({
   storage: multer.diskStorage({
     destination: (req, file, callback) => {
-      const category = req.query.category || "Uncategorized";
-      const categoryDir = path.join(__dirname, "public", "img", category);
+      const categoryDir = path.join(UPLOADS_DIR, normalizeUploadCategory(req.query.category));
       fs.mkdirSync(categoryDir, { recursive: true });
       callback(null, categoryDir);
     },
@@ -211,8 +220,8 @@ function resolveCatalogImage(product) {
 
 app.post("/api/admin/upload-image", requireAdmin, imageUpload.single("image"), (req, res) => {
   if (!req.file) return res.status(400).json({ error: "Please choose a PNG, JPG, WEBP, or GIF image under 5MB." });
-  const category = req.query.category || "Uncategorized";
-  res.status(201).json({ url: `/img/${category}/${req.file.filename}` });
+  const category = normalizeUploadCategory(req.query.category);
+  res.status(201).json({ url: `/uploads/${category}/${req.file.filename}` });
 });
 
 // Public API
