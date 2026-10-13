@@ -11,6 +11,7 @@
     allProducts: [],
     filteredProducts: [],
     activeCategory: "all",
+    filterCategory: "all",
     searchQuery: "",
     showingWishlist: false,
     productDetailsId: null,
@@ -157,6 +158,7 @@
       const requestedCategory = params.get("category");
       state.activeCategory = state.categories.some((category) => category.id === requestedCategory)
         ? requestedCategory : "all";
+      state.filterCategory = state.activeCategory;
       state.searchQuery = params.get("search") || "";
       el.searchInput.value = state.searchQuery;
       syncWishlistWithProducts();
@@ -308,17 +310,21 @@
   // Rendering: drawer category choices + product grid ("Just For You")
   function renderFilterPills() {
     const pills = [{ id: "all", name: "All" }, ...state.categories];
-    const selectedCategory = pills.find((category) => category.id === state.activeCategory);
+    const selectedCategory = pills.find((category) => category.id === state.filterCategory);
     el.selectedCategoryLabel.textContent = selectedCategory ? selectedCategory.name : "All categories";
     el.filterPills.innerHTML = pills
       .map(
         (c) =>
-          `<button class="drawer-category-choice ${c.id === state.activeCategory ? "active" : ""}" data-cat="${c.id}" type="button" aria-pressed="${c.id === state.activeCategory}">${c.name}</button>`
+          `<button class="drawer-category-choice ${c.id === state.filterCategory ? "active" : ""}" data-cat="${c.id}" type="button" aria-pressed="${c.id === state.filterCategory}">${c.name}</button>`
       )
       .join("");
 
     el.filterPills.querySelectorAll(".drawer-category-choice").forEach((btn) => {
-      btn.addEventListener("click", () => setActiveCategory(btn.dataset.cat));
+      btn.addEventListener("click", () => {
+        state.filterCategory = btn.dataset.cat;
+        renderFilterPills();
+        toggleCategoryDropdown(false);
+      });
     });
   }
 
@@ -331,7 +337,12 @@
   function setActiveCategory(catId) {
     state.showingWishlist = false;
     state.activeCategory = catId;
+    state.filterCategory = catId;
     state.searchQuery = "";
+    state.minPrice = null;
+    state.maxPrice = null;
+    el.priceFilterForm.reset();
+    el.maxPrice.setCustomValidity("");
     rememberPreference(catId === "all" ? null : catId);
     el.searchInput.value = "";
     applyFilters();
@@ -894,6 +905,7 @@
       state.searchQuery = el.searchInput.value.trim();
       rememberSearch(state.searchQuery);
       state.activeCategory = "all";
+      state.filterCategory = "all";
       applyFilters();
       renderFilterPills();
       document.getElementById("justForYou").scrollIntoView({ behavior: "smooth" });
@@ -903,6 +915,7 @@
         state.showingWishlist = false;
         state.searchQuery = "";
         state.activeCategory = "all";
+        state.filterCategory = "all";
         applyFilters();
         renderFilterPills();
       }
@@ -910,6 +923,15 @@
 
     el.priceFilterForm.addEventListener("submit", (e) => {
       e.preventDefault();
+    });
+
+    function applyDrawerFilters() {
+      if (state.filterCategory === "all") {
+        showToast("Choose a category before showing products.");
+        toggleCategoryDropdown(true);
+        return;
+      }
+
       const minValue = el.minPrice.value.trim();
       const maxValue = el.maxPrice.value.trim();
       const minPrice = minValue === "" ? null : Number(minValue);
@@ -922,10 +944,17 @@
       );
       if (!el.priceFilterForm.reportValidity()) return;
 
+      state.showingWishlist = false;
+      state.searchQuery = "";
+      state.activeCategory = state.filterCategory;
       state.minPrice = minPrice;
       state.maxPrice = maxPrice;
+      el.searchInput.value = "";
       applyFilters();
-    });
+      closeFilterDrawer();
+      scrollFeedHeadingIntoView();
+    }
+
     el.maxPrice.addEventListener("input", () => el.maxPrice.setCustomValidity(""));
     el.minPrice.addEventListener("input", () => el.maxPrice.setCustomValidity(""));
     el.clearPriceFilter.addEventListener("click", () => {
@@ -934,6 +963,7 @@
       state.minPrice = null;
       state.maxPrice = null;
       state.activeCategory = "all";
+      state.filterCategory = "all";
       state.showingWishlist = false;
       state.searchQuery = "";
       el.searchInput.value = "";
@@ -944,7 +974,7 @@
     el.openFilterDrawer.addEventListener("click", openFilterDrawer);
     el.closeFilterDrawer.addEventListener("click", closeFilterDrawer);
     el.filterDrawerBackdrop.addEventListener("click", closeFilterDrawer);
-    el.applyFilterDrawer.addEventListener("click", closeFilterDrawer);
+    el.applyFilterDrawer.addEventListener("click", applyDrawerFilters);
     el.categoryFilterToggle.addEventListener("click", () => toggleCategoryDropdown());
 
     el.cartBtn.addEventListener("click", openCart);
@@ -961,6 +991,7 @@
       closeFilterDrawer();
       state.showingWishlist = true;
       state.activeCategory = "all";
+      state.filterCategory = "all";
       state.searchQuery = "";
       renderFilterPills();
       applyFilters();
@@ -1050,6 +1081,10 @@
   }
 
   function openFilterDrawer() {
+    state.filterCategory = state.activeCategory;
+    el.minPrice.value = state.minPrice === null ? "" : String(state.minPrice);
+    el.maxPrice.value = state.maxPrice === null ? "" : String(state.maxPrice);
+    renderFilterPills();
     el.filterDrawer.classList.add("open");
     el.filterDrawerBackdrop.classList.add("open");
     el.filterDrawer.setAttribute("aria-hidden", "false");
