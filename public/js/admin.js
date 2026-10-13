@@ -40,7 +40,9 @@
     clearFlashSaleCountdown: document.getElementById("clearFlashSaleCountdown"),
     saveFlashSaleCountdown: document.getElementById("saveFlashSaleCountdown"),
     openAddProductBtn: document.getElementById("openAddProductBtn"),
-    categoryFilters: document.querySelectorAll(".category-filter"),
+    overviewCategoryFilter: document.getElementById("overviewCategoryFilter"),
+    productsCategoryFilter: document.getElementById("productsCategoryFilter"),
+    flashCategoryFilter: document.getElementById("flashCategoryFilter"),
 
     productModal: document.getElementById("productModal"),
     productModalTitle: document.getElementById("productModalTitle"),
@@ -205,17 +207,23 @@
   }
 
   function populateProductCategoryFilter() {
-    const selectedCategory = el.categoryFilters[0].value;
     const options = `<option value="all">All categories</option>` + state.categories
       .map((category) => `<option value="${category.id}">${category.name}</option>`).join("");
-    el.categoryFilters.forEach((filter) => {
+    [
+      el.overviewCategoryFilter,
+      el.productsCategoryFilter,
+      el.flashCategoryFilter
+    ].forEach((filter) => {
+      const selectedCategory = filter.value;
       filter.innerHTML = options;
-      filter.value = selectedCategory;
+      filter.value = state.categories.some((category) => category.id === selectedCategory)
+        ? selectedCategory
+        : "all";
     });
   }
 
-  function filteredProducts() {
-    const category = el.categoryFilters[0].value;
+  function filteredProducts(categoryFilter) {
+    const category = categoryFilter.value;
     return category === "all" ? state.products : state.products.filter((product) => product.category === category);
   }
 
@@ -229,7 +237,8 @@
       return;
     }
 
-    stats.lowStockAlerts = filteredProducts().filter((product) => product.stock <= 10).length;
+    stats.lowStockAlerts = filteredProducts(el.overviewCategoryFilter)
+      .filter((product) => product.stock <= 10).length;
 
     el.statsGrid.innerHTML = `
       <div class="stat-card">
@@ -272,7 +281,7 @@
   }
 
   function renderLowStockTable() {
-    const lowStock = filteredProducts().filter((p) => p.stock <= 10);
+    const lowStock = filteredProducts(el.overviewCategoryFilter).filter((p) => p.stock <= 10);
     el.lowStockBadge.textContent = lowStock.length;
 
     if (lowStock.length === 0) {
@@ -305,9 +314,9 @@
 
   // Products table
   function renderProductsTable() {
-    const products = filteredProducts();
+    const products = filteredProducts(el.productsCategoryFilter);
     if (products.length === 0) {
-      const hasFilters = el.categoryFilters[0].value !== "all";
+      const hasFilters = el.productsCategoryFilter.value !== "all";
       el.productsTable.innerHTML = `<tr class="empty-row"><td colspan="7">${hasFilters ? "No products match the selected filters." : "No products yet. Click \"+ Add Product\" to create one."}</td></tr>`;
       return;
     }
@@ -386,7 +395,7 @@
 
   // Flash sale table
   function renderFlashSaleTable() {
-    const products = filteredProducts();
+    const products = filteredProducts(el.flashCategoryFilter);
     if (products.length === 0) {
       el.flashSaleTable.innerHTML = `<tr class="empty-row"><td colspan="6">No products available.</td></tr>`;
       return;
@@ -563,14 +572,15 @@
 
   // Add / Edit product modal
   el.openAddProductBtn.addEventListener("click", () => openProductModal(null));
-  el.categoryFilters.forEach((filter) => {
-    filter.addEventListener("change", () => {
-      el.categoryFilters.forEach((otherFilter) => { otherFilter.value = filter.value; });
-      renderStats();
-      renderLowStockTable();
-      renderProductsTable();
-      renderFlashSaleTable();
-    });
+  el.overviewCategoryFilter.addEventListener("change", () => {
+    renderStats();
+    renderLowStockTable();
+  });
+  el.productsCategoryFilter.addEventListener("change", () => {
+    renderProductsTable();
+  });
+  el.flashCategoryFilter.addEventListener("change", () => {
+    renderFlashSaleTable();
   });
 
   function openProductModal(id) {
