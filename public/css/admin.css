@@ -337,7 +337,7 @@ body { background: var(--pcb-bg); }
 }
 
 .admin-table tr:last-child td { border-bottom: none; }
-.admin-table tr:hover td { background: #fafbff; }
+.admin-table tr:hover td { background: #e2e2e3; }
 
 .table-product-cell { display: flex; align-items: center; gap: 10px; }
 .table-product-icon {

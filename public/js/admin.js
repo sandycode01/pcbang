@@ -408,7 +408,7 @@
           <input class="flash-sale-price-input" type="number" min="0.01" step="0.01"
             value="${p.salePrice === null || p.salePrice === undefined ? "" : Number(p.salePrice)}"
             aria-label="Flash sale price for ${escapeHtml(p.title)}" placeholder="Optional" />
-          <span class="flash-sale-price-help">Campaign only; blank uses normal price</span>
+          <span class="flash-sale-price-help"></span>
         </td>
         <td>${stockPill(Number(p.stock))}</td>
         <td>
