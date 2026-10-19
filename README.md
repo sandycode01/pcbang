@@ -17,6 +17,8 @@ category preferences, and recent searches remain browser-local.
   scrollable deals feed (discount %, price, stock meter)
 - Category grid and navigation (Processors, Graphics Cards, Motherboards, RAM,
   Storage, PSUs, Cases, Cooling, Peripherals, Laptops)
+- Centered **Build a compatible PC** link below the category grid opens the
+  standalone Compatibility Checker
 - Slide-out storefront filters with category selection and minimum/maximum price
   ranges; filters can be combined to narrow the product feed
 - Personalized "Just For You" product feed showing up to 13 ranked products

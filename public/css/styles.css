@@ -503,6 +503,39 @@ img { max-width: 100%; display: block; }
   line-height: 1.25;
 }
 
+.category-compatibility-action {
+  display: flex;
+  justify-content: center;
+  margin-top: 18px;
+}
+
+.category-compatibility-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 42px;
+  padding: 10px 20px;
+  border: 1px solid var(--pcb-navy);
+  border-radius: var(--radius-md);
+  background: var(--pcb-navy);
+  color: #fff;
+  font-size: 14px;
+  font-weight: 700;
+  text-align: center;
+  text-decoration: none;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.category-compatibility-link:hover {
+  border-color: var(--pcb-blue);
+  background: var(--pcb-blue);
+}
+
+.category-compatibility-link:focus-visible {
+  outline: 2px solid var(--pcb-blue);
+  outline-offset: 3px;
+}
+
 /* PRODUCT GRID / CARDS ("Just For You") */
 .product-grid {
   display: grid;
