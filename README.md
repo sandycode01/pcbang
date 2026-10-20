@@ -1,4 +1,4 @@
-# PCBang — Online Store for PC Parts & Accessories
+# PCBang — Online Store for PC Parts & Accessories qwerty
 
 A fully functional e-commerce demo app built with **Node.js + Express** on the
 back-end and **vanilla HTML/CSS/JS** on the front end, styled after modern
