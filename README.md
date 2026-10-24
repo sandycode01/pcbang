@@ -1,8 +1,8 @@
 # PCBang — Online Store for PC Parts & Accessories
 
-A fully functional e-commerce demo app built with **Node.js + Express** on the
+A fully functional e-commerce web app built with **Node.js + Express** on the
 back-end and **vanilla HTML/CSS/JS** on the front end, styled after modern
-marketplaces like Lazada PH but focused exclusively on PC components.
+marketplaces in the Philippines.
 
 MySQL stores the catalog, customer accounts, persistent login sessions, each
 signed-in customer's cart and wishlist, orders, order items, stock, and sales
