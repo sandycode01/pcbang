@@ -1,6 +1,6 @@
 // PCBang public storefront logic: data fetching, rendering, cart, wishlist,
 // countdown timer, search/filter, and checkout simulation.
-// Cart + wishlist state persist in localStorage; accounts and orders use the backend.
+// Guest cart + wishlist state use localStorage; signed-in accounts sync them with the backend.
 
 (function () {
   "use strict";
@@ -26,6 +26,7 @@
     currentUser: loadFromStorage("pcbang_user", null),
     authToken: loadFromStorage("pcbang_auth_token", "")
   };
+  let savedItemsSaveQueue = Promise.resolve();
 
   function loadFromStorage(key, fallback) {
     try {
@@ -53,6 +54,83 @@
     saveToStorage("pcbang_auth_token", token);
     saveToStorage("pcbang_user", user);
     el.loginBtn.querySelector(".action-label").textContent = user ? user.name : "Login";
+  }
+
+  function saveSavedItemsLocally() {
+    saveToStorage("pcbang_cart", state.cart);
+    saveToStorage("pcbang_wishlist", state.wishlist);
+  }
+
+  function persistSavedItems() {
+    saveSavedItemsLocally();
+    if (!state.authToken) return Promise.resolve();
+
+    const token = state.authToken;
+    const snapshot = {
+      cart: state.cart.map((item) => ({ id: item.id, qty: item.qty })),
+      wishlist: [...state.wishlist]
+    };
+    savedItemsSaveQueue = savedItemsSaveQueue.catch(() => {}).then(async () => {
+      const response = await fetch("/api/account/saved-items", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        body: JSON.stringify(snapshot)
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || "Unable to save your cart and wishlist.");
+    }).catch((error) => {
+      console.error("Saved cart/wishlist sync failed:", error);
+      showToast(`Your changes are on this device but could not be saved to your account: ${error.message}`);
+    });
+    return savedItemsSaveQueue;
+  }
+
+  async function loadAccountSavedItems(mergeGuestItems = false) {
+    const guestCart = mergeGuestItems ? state.cart.map((item) => ({ ...item })) : [];
+    const guestWishlist = mergeGuestItems ? [...state.wishlist] : [];
+    const response = await fetch("/api/account/saved-items", { headers: authHeaders() });
+    const data = await response.json();
+    if (!response.ok) {
+      const error = new Error(data.error || "Unable to load your saved cart and wishlist.");
+      error.status = response.status;
+      throw error;
+    }
+
+    const productsById = new Map(state.allProducts.map((product) => [product.id, product]));
+    const cartById = new Map();
+    (Array.isArray(data.cart) ? data.cart : []).forEach((item) => {
+      const product = productsById.get(item.id);
+      if (product && product.stock > 0 && Number.isInteger(item.qty) && item.qty > 0) {
+        cartById.set(item.id, Math.min(item.qty, product.stock));
+      }
+    });
+    guestCart.forEach((item) => {
+      const product = productsById.get(item.id);
+      if (product && product.stock > 0 && Number.isInteger(item.qty) && item.qty > 0) {
+        cartById.set(item.id, Math.min(Math.max(cartById.get(item.id) || 0, item.qty), product.stock));
+      }
+    });
+    state.cart = [...cartById].map(([id, qty]) => ({ id, qty }));
+    state.wishlist = [...new Set([
+      ...(Array.isArray(data.wishlist) ? data.wishlist : []),
+      ...guestWishlist
+    ].filter((id) => productsById.has(id)))];
+
+    updateCartBadge();
+    updateWishlistBadge();
+    renderCartPanel();
+    applyFilters();
+    await persistSavedItems();
+  }
+
+  function clearLocalSavedItems() {
+    state.cart = [];
+    state.wishlist = [];
+    saveSavedItemsLocally();
+    updateCartBadge();
+    updateWishlistBadge();
+    renderCartPanel();
+    applyFilters();
   }
 
   function rememberPreference(category) {
@@ -145,6 +223,8 @@
     signupForm: document.getElementById("signupForm"),
     authSwitchBtn: document.getElementById("authSwitchBtn"),
     supportBtn: document.getElementById("supportBtn"),
+    supportModal: document.getElementById("supportModal"),
+    supportForm: document.getElementById("supportForm"),
     toastContainer: document.getElementById("toastContainer")
   };
 
@@ -165,6 +245,20 @@
       state.categories = await catRes.json();
       state.allProducts = await prodRes.json();
       state.flashSaleEndsAt = (await saleRes.json()).endsAt;
+      if (state.authToken) {
+        try {
+          await loadAccountSavedItems();
+        } catch (error) {
+          if (error.status === 401) {
+            setCurrentUser("", null);
+            clearLocalSavedItems();
+            showToast("Your session expired. Log in again to access saved items.");
+          } else {
+            console.error("Unable to restore account saved items:", error);
+            showToast(`Unable to restore your account cart and wishlist: ${error.message}`);
+          }
+        }
+      }
       const params = new URLSearchParams(window.location.search);
       const requestedCategory = params.get("category");
       state.activeCategory = state.categories.some((category) => category.id === requestedCategory)
@@ -631,7 +725,7 @@
       state.cart.push({ id: productId, qty: requestedQuantity });
     }
 
-    saveToStorage("pcbang_cart", state.cart);
+    persistSavedItems();
     updateCartBadge();
     renderCartPanel();
     showToast(`Added "${truncate(product.title, 40)}" to cart.`);
@@ -656,7 +750,7 @@
       item.qty = newQty;
     }
 
-    saveToStorage("pcbang_cart", state.cart);
+    persistSavedItems();
     updateCartBadge();
     renderCartPanel();
   }
@@ -668,7 +762,7 @@
     const quantity = clampQuantity(value, product.stock);
     if (quantity !== Number(value)) showToast(`Only ${product.stock} in stock.`);
     item.qty = quantity;
-    saveToStorage("pcbang_cart", state.cart);
+    persistSavedItems();
     updateCartBadge();
     renderCartPanel();
   }
@@ -679,7 +773,7 @@
 
   function removeFromCart(productId) {
     state.cart = state.cart.filter((i) => i.id !== productId);
-    saveToStorage("pcbang_cart", state.cart);
+    persistSavedItems();
     updateCartBadge();
     renderCartPanel();
   }
@@ -720,7 +814,7 @@
 
     if (changed) {
       state.wishlist = validWishlist;
-      saveToStorage("pcbang_wishlist", state.wishlist);
+      persistSavedItems();
     }
     updateWishlistBadge();
   }
@@ -734,7 +828,7 @@
       state.wishlist.splice(idx, 1);
       showToast("Removed from wishlist.");
     }
-    saveToStorage("pcbang_wishlist", state.wishlist);
+    persistSavedItems();
     updateWishlistBadge();
     applyFilters();
   }
@@ -855,7 +949,7 @@
       if (!response.ok) throw new Error(data.error || "Unable to place order.");
 
       state.cart = [];
-      saveToStorage("pcbang_cart", state.cart);
+      await persistSavedItems();
       updateCartBadge();
       renderCartPanel();
       closeModal("checkoutModal");
@@ -876,10 +970,14 @@
 
   // Generic modal helpers
   function openModal(id) {
-    document.getElementById(id).classList.add("open");
+    const modal = document.getElementById(id);
+    modal.classList.add("open");
+    modal.setAttribute("aria-hidden", "false");
   }
   function closeModal(id) {
-    document.getElementById(id).classList.remove("open");
+    const modal = document.getElementById(id);
+    modal.classList.remove("open");
+    modal.setAttribute("aria-hidden", "true");
   }
 
   // Toasts
@@ -1021,7 +1119,7 @@
       e.preventDefault();
       const email = document.getElementById("loginEmail").value.trim().toLowerCase();
       const password = document.getElementById("loginPassword").value;
-      submitAuth("/api/auth/login", { email, password }, "Welcome back!");
+      await submitAuth("/api/auth/login", { email, password }, "Welcome back!");
     });
     el.signupForm.addEventListener("submit", async (e) => {
       e.preventDefault();
@@ -1062,8 +1160,20 @@
       el.authSwitchBtn.textContent = showingLogin ? "Back to log in" : "Create an account";
     });
 
-    el.supportBtn.addEventListener("click", () => {
-      showToast("Customer support: support@pcbang.ph | (02) 8123-4567");
+    el.supportBtn.addEventListener("click", () => openModal("supportModal"));
+    el.supportForm.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const orderId = document.getElementById("supportOrderId").value.trim();
+      const message = document.getElementById("supportMessage").value.trim();
+      const subject = orderId ? `Support request for order ${orderId}` : "PCBang support request";
+      const body = [
+        `Reply-to email: ${document.getElementById("supportEmail").value.trim()}`,
+        orderId ? `Order number: ${orderId}` : "",
+        "",
+        message
+      ].filter(Boolean).join("\n");
+      const query = new URLSearchParams({ subject, body });
+      window.location.href = `mailto:support@pcbang.ph?${query.toString()}`;
     });
 
     document.querySelectorAll("[data-close-modal]").forEach((btn) => {
@@ -1077,7 +1187,7 @@
       backdrop.addEventListener("click", () => {
         const modal = backdrop.closest(".modal");
         if (modal.id === "loginModal") resetAuthModal();
-        modal.classList.remove("open");
+        closeModal(modal.id);
       });
     });
 
@@ -1113,7 +1223,7 @@
   }
 
   function closeAllModals() {
-    document.querySelectorAll(".modal.open").forEach((m) => m.classList.remove("open"));
+    document.querySelectorAll(".modal.open").forEach((modal) => closeModal(modal.id));
   }
 
   function showLoginForm() {
@@ -1143,6 +1253,13 @@
       setCurrentUser(data.token, data.user);
       closeModal("loginModal");
       el.loginForm.reset();
+      try {
+        await loadAccountSavedItems(true);
+      } catch (error) {
+        console.error("Unable to sync saved items after login:", error);
+        showToast(`Signed in, but your account cart and wishlist could not be synced: ${error.message}`);
+        return;
+      }
       showToast(message);
     } catch (error) {
       console.error("Authentication request failed:", error);
@@ -1157,6 +1274,7 @@
       const response = await fetch("/api/account", { headers: authHeaders() });
       if (response.status === 401) {
         setCurrentUser("", null);
+        clearLocalSavedItems();
         closeModal("accountModal");
         showToast("Your session expired. Please log in again.");
         return;
@@ -1173,9 +1291,11 @@
         <button type="button" class="auth-switch-btn" id="logoutBtn">Log out</button>`;
       document.getElementById("logoutBtn").addEventListener("click", async () => {
         try {
+          await savedItemsSaveQueue;
           const logoutResponse = await fetch("/api/auth/logout", { method: "POST", headers: authHeaders() });
           if (!logoutResponse.ok) throw new Error("Unable to log out. Please try again.");
           setCurrentUser("", null);
+          clearLocalSavedItems();
           closeModal("accountModal");
           showToast("You have been logged out.");
         } catch (error) {

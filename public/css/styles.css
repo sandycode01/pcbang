@@ -1375,6 +1375,18 @@ img { max-width: 100%; display: block; }
 
 .modal-box h3 { margin: 0 0 8px; font-size: 19px; font-weight: 800; text-align: center; color: var(--pcb-navy); }
 .modal-box p.modal-desc { text-align: center; font-size: 13.5px; color: var(--pcb-text-light); margin: 0 0 20px; }
+.support-modal-box {
+  max-height: calc(100vh - 40px);
+  max-height: calc(100dvh - 40px);
+  overflow-y: auto;
+}
+.support-contact-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 22px; }
+.support-contact-actions .btn-primary,
+.support-phone-link { display: flex; align-items: center; justify-content: center; min-height: 42px; text-align: center; text-decoration: none; }
+.support-phone-link { border: 1px solid var(--pcb-border); border-radius: var(--radius-sm); color: var(--pcb-navy); font-size: 13px; font-weight: 700; }
+.support-phone-link:hover { border-color: var(--pcb-blue); color: var(--pcb-blue); }
+.support-modal-box textarea { resize: vertical; }
+.support-note { color: var(--pcb-text-light); font-size: 12px; line-height: 1.5; margin: 0 0 14px; }
 
 .account-details {
   display: grid;

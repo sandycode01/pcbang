@@ -65,6 +65,18 @@ CREATE TABLE IF NOT EXISTS user_sessions (
   INDEX idx_user_sessions_user (user_id)
 );
 
+CREATE TABLE IF NOT EXISTS user_saved_items (
+  user_id BIGINT UNSIGNED NOT NULL,
+  product_id VARCHAR(32) NOT NULL,
+  list_type ENUM('cart', 'wishlist') NOT NULL,
+  quantity INT UNSIGNED NOT NULL DEFAULT 1,
+  updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (user_id, list_type, product_id),
+  CONSTRAINT fk_user_saved_items_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+  CONSTRAINT fk_user_saved_items_product FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE CASCADE,
+  INDEX idx_user_saved_items_product (product_id)
+);
+
 CREATE TABLE IF NOT EXISTS orders (
   id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
   user_id BIGINT UNSIGNED NULL,
