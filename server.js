@@ -484,6 +484,79 @@ app.get("/api/account", requireUser, async (req, res, next) => {
   } catch (err) { next(err); }
 });
 
+app.get("/api/account/saved-items", requireUser, async (req, res, next) => {
+  try {
+    const [items] = await pool.query(
+      `SELECT product_id AS productId, list_type AS listType, quantity
+       FROM user_saved_items WHERE user_id = ?`,
+      [req.user.id]
+    );
+    res.json({
+      cart: items.filter((item) => item.listType === "cart")
+        .map((item) => ({ id: item.productId, qty: Number(item.quantity) })),
+      wishlist: items.filter((item) => item.listType === "wishlist")
+        .map((item) => item.productId)
+    });
+  } catch (err) { next(err); }
+});
+
+app.put("/api/account/saved-items", requireUser, async (req, res, next) => {
+  const { cart = [], wishlist = [] } = req.body || {};
+  const isValidId = (id) => typeof id === "string" && id.length > 0 && id.length <= 32;
+  if (!Array.isArray(cart) || !Array.isArray(wishlist) || cart.length > 500 || wishlist.length > 500 ||
+      cart.some((item) => !item || !isValidId(item.id) ||
+        !Number.isSafeInteger(item.qty) || item.qty < 1) ||
+      wishlist.some((id) => !isValidId(id))) {
+    return res.status(400).json({ error: "Saved cart or wishlist data is invalid." });
+  }
+
+  const cartIds = cart.map((item) => item.id);
+  const wishlistIds = wishlist;
+  if (new Set(cartIds).size !== cartIds.length || new Set(wishlistIds).size !== wishlistIds.length) {
+    return res.status(400).json({ error: "Saved lists cannot contain duplicate products." });
+  }
+
+  let connection;
+  try {
+    const productIds = [...new Set([...cartIds, ...wishlistIds])];
+    const [products] = productIds.length
+      ? await pool.query("SELECT id, title, stock FROM products WHERE id IN (?)", [productIds])
+      : [[]];
+    const productsById = new Map(products.map((product) => [product.id, product]));
+    if (productIds.some((id) => !productsById.has(id))) {
+      return res.status(400).json({ error: "A saved product no longer exists." });
+    }
+    const unavailableCartItem = cart.find((item) => item.qty > Number(productsById.get(item.id).stock));
+    if (unavailableCartItem) {
+      return res.status(409).json({
+        error: `Only ${productsById.get(unavailableCartItem.id).stock} of "${productsById.get(unavailableCartItem.id).title}" are currently in stock.`
+      });
+    }
+
+    connection = await pool.getConnection();
+    await connection.beginTransaction();
+    await connection.query("DELETE FROM user_saved_items WHERE user_id = ?", [req.user.id]);
+    const rows = [
+      ...cart.map((item) => [req.user.id, item.id, "cart", item.qty]),
+      ...wishlistIds.map((id) => [req.user.id, id, "wishlist", 1])
+    ];
+    if (rows.length) {
+      await connection.query(
+        `INSERT INTO user_saved_items (user_id, product_id, list_type, quantity)
+         VALUES ${rows.map(() => "(?, ?, ?, ?)").join(", ")}`,
+        rows.flat()
+      );
+    }
+    await connection.commit();
+    res.json({ success: true });
+  } catch (err) {
+    if (connection) await connection.rollback();
+    next(err);
+  } finally {
+    if (connection) connection.release();
+  }
+});
+
 app.post("/api/auth/logout", requireUser, (req, res) => {
   const token = (req.headers.authorization || "").replace("Bearer ", "");
   pool.query("DELETE FROM user_sessions WHERE token = ?", [token])

@@ -398,6 +398,38 @@
   </div>
 </div>
 
+<!-- CUSTOMER SUPPORT MODAL -->
+<div class="modal" id="supportModal" role="dialog" aria-modal="true" aria-hidden="true" aria-labelledby="supportTitle">
+  <div class="modal-backdrop"></div>
+  <div class="modal-box support-modal-box">
+    <button class="modal-close" data-close-modal="supportModal" aria-label="Close support">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </button>
+    <h3 id="supportTitle">How can we help?</h3>
+    <p class="modal-desc">Contact our support team or prepare a message to send from your email app.</p>
+    <div class="support-contact-actions">
+      <a class="btn-primary" href="mailto:support@pcbang.ph">Email support@pcbang.ph</a>
+      <a class="support-phone-link" href="tel:+63281234567">Call (02) 8123-4567</a>
+    </div>
+    <form id="supportForm">
+      <div class="form-group">
+        <label for="supportEmail">Your email address</label>
+        <input type="email" id="supportEmail" required autocomplete="email" placeholder="you@example.com" />
+      </div>
+      <div class="form-group">
+        <label for="supportOrderId">Order number (optional)</label>
+        <input type="text" id="supportOrderId" autocomplete="off" placeholder="For example, 123" />
+      </div>
+      <div class="form-group">
+        <label for="supportMessage">How can we help?</label>
+        <textarea id="supportMessage" required rows="4" maxlength="2000" placeholder="Describe your question or issue"></textarea>
+      </div>
+      <p class="support-note">Your email app will open with your message ready to send. The form does not send messages directly from this website.</p>
+      <button type="submit" class="btn-primary">Prepare support email</button>
+    </form>
+  </div>
+</div>
+
 <!-- PRODUCT DETAILS MODAL -->
 <div class="modal" id="productDetailsModal">
   <div class="modal-backdrop"></div>

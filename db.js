@@ -35,6 +35,18 @@ async function initializeDatabase() {
         CONSTRAINT fk_user_sessions_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
         INDEX idx_user_sessions_user (user_id)
       )`);
+    await connection.query(`
+      CREATE TABLE IF NOT EXISTS user_saved_items (
+        user_id BIGINT UNSIGNED NOT NULL,
+        product_id VARCHAR(32) NOT NULL,
+        list_type ENUM('cart', 'wishlist') NOT NULL,
+        quantity INT UNSIGNED NOT NULL DEFAULT 1,
+        updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        PRIMARY KEY (user_id, list_type, product_id),
+        CONSTRAINT fk_user_saved_items_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+        CONSTRAINT fk_user_saved_items_product FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE CASCADE,
+        INDEX idx_user_saved_items_product (product_id)
+      )`);
     const [salePriceColumn] = await connection.query(
       `SELECT COUNT(*) AS count FROM information_schema.columns
        WHERE table_schema = DATABASE() AND table_name = 'products' AND column_name = 'sale_price'`

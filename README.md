@@ -4,9 +4,11 @@ A fully functional e-commerce demo app built with **Node.js + Express** on the
 back-end and **vanilla HTML/CSS/JS** on the front end, styled after modern
 marketplaces like Lazada PH but focused exclusively on PC components.
 
-MySQL stores the catalog, customer accounts, persistent login sessions, orders,
-order items, stock, and sales counters. Cart, wishlist, recently viewed items,
-category preferences, and recent searches remain browser-local.
+MySQL stores the catalog, customer accounts, persistent login sessions, each
+signed-in customer's cart and wishlist, orders, order items, stock, and sales
+counters. Guest cart and wishlist data, recently viewed items, category
+preferences, and recent searches remain browser-local. When a guest logs in,
+their cart and wishlist are merged with the account's saved lists.
 
 ## Features
 
@@ -27,7 +29,10 @@ category preferences, and recent searches remain browser-local.
   badges
 - Slide-out cart panel with quantity controls and a mock checkout flow
   (delivery form → order confirmation)
-- Wishlist with a live counter
+- Wishlist with a live counter; signed-in carts and wishlists sync to the
+  account and are restored on other devices after login
+- Support dialog with email and phone links and a form that prepares an email
+  in the customer's mail app
 - Customer signup with name, email, password, age, address, and phone number
 - Customer login with persistent database-backed sessions
 - My Account view with profile details, order items, product images, item prices,
@@ -260,6 +265,10 @@ corresponding login endpoint in the `Authorization` header.
 - `POST /api/auth/login` — `{ email, password }` → `{ token, user }`
 - `POST /api/auth/logout`
 - `GET /api/account` — returns the authenticated profile and order items
+- `GET /api/account/saved-items` — returns the signed-in customer's cart and
+  wishlist
+- `PUT /api/account/saved-items` — replaces the customer's saved cart and
+  wishlist after validating product IDs and current stock
 
 **Admin** (require header `Authorization: Bearer <token>` from `/api/admin/login`)
 - `POST /api/admin/login` — `{ username, password }` → `{ token }`
