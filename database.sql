@@ -74,7 +74,7 @@ CREATE TABLE IF NOT EXISTS orders (
   payment_method VARCHAR(50) NOT NULL,
   subtotal DECIMAL(12,2) NOT NULL,
   total DECIMAL(12,2) NOT NULL,
-  status ENUM('pending','paid','processing','shipped','completed','cancelled') NOT NULL DEFAULT 'pending',
+  status VARCHAR(32) NOT NULL DEFAULT 'pending',
   created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   INDEX idx_orders_status_created (status, created_at),
   INDEX idx_orders_user (user_id),

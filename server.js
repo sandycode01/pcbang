@@ -509,10 +509,26 @@ app.get("/api/admin/stats", requireAdmin, async (req, res, next) => {
       SELECT COUNT(*) AS totalProducts,
              COUNT(DISTINCT category_id) AS activeCategories,
              SUM(stock <= 10) AS lowStockAlerts,
-             SUM(COALESCE(discount_price, price) * sold) AS totalSales,
              SUM(flash_sale = 1) AS flashSaleCount
       FROM products`);
-    res.json({ ...stats, totalSales: stats.totalSales || 0 });
+    const [monthlySales] = await pool.query(`
+      SELECT DATE_FORMAT(created_at, '%Y-%m') AS month,
+             SUM(total) AS totalSales,
+             COUNT(*) AS orderCount
+      FROM orders
+      WHERE status IN ('paid', 'processing', 'shipped', 'on_the_way', 'completed')
+      GROUP BY DATE_FORMAT(created_at, '%Y-%m')
+      ORDER BY month DESC`);
+    const [[currentMonth]] = await pool.query(
+      "SELECT DATE_FORMAT(CURRENT_DATE(), '%Y-%m') AS month"
+    );
+    const currentMonthSales = monthlySales.find((entry) => entry.month === currentMonth.month);
+    res.json({
+      ...stats,
+      totalSales: currentMonthSales ? Number(currentMonthSales.totalSales) : 0,
+      currentMonth: currentMonth.month,
+      monthlySales
+    });
   } catch (err) { next(err); }
 });
 
@@ -566,6 +582,31 @@ app.get("/api/admin/orders", requireAdmin, async (req, res, next) => {
       FROM orders
       ORDER BY created_at DESC, id DESC`);
     res.json(rows);
+  } catch (err) { next(err); }
+});
+
+app.put("/api/admin/orders/:id/status", requireAdmin, async (req, res, next) => {
+  const orderId = Number(req.params.id);
+  const status = req.body?.status;
+  const allowedStatuses = new Set([
+    "pending", "paid", "processing", "shipped", "on_the_way",
+    "completed", "cancelled", "returned"
+  ]);
+  if (!Number.isSafeInteger(orderId) || orderId < 1) {
+    return res.status(400).json({ error: "Invalid order ID." });
+  }
+  if (typeof status !== "string" || !allowedStatuses.has(status)) {
+    return res.status(400).json({ error: "Choose a valid order status." });
+  }
+
+  try {
+    await pool.query("UPDATE orders SET status = ? WHERE id = ?", [status, orderId]);
+    const [rows] = await pool.query(
+      "SELECT id, status FROM orders WHERE id = ?",
+      [orderId]
+    );
+    if (!rows[0]) return res.status(404).json({ error: "Order not found." });
+    res.json(rows[0]);
   } catch (err) { next(err); }
 });
 

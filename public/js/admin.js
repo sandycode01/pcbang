@@ -17,6 +17,18 @@
   const money = (n) =>
     "₱" + Number(n).toLocaleString("en-PH", { minimumFractionDigits: 0, maximumFractionDigits: 0 });
 
+  const orderStatusLabels = {
+    pending: "Pending",
+    paid: "Paid",
+    processing: "Processing",
+    shipped: "Shipped",
+    on_the_way: "On the way",
+    completed: "Completed",
+    cancelled: "Cancelled",
+    returned: "Returned"
+  };
+  const orderStatusOptions = Object.entries(orderStatusLabels);
+
   const el = {
     loginScreen: document.getElementById("loginScreen"),
     adminApp: document.getElementById("adminApp"),
@@ -25,6 +37,7 @@
     logoutBtn: document.getElementById("logoutBtn"),
 
     statsGrid: document.getElementById("statsGrid"),
+    monthlySalesTable: document.querySelector("#monthlySalesTable tbody"),
     lowStockBadge: document.getElementById("lowStockBadge"),
     lowStockTable: document.querySelector("#lowStockTable tbody"),
 
@@ -192,7 +205,8 @@
     state.refreshTimer = setInterval(() => {
       if (!document.hidden && state.token && !el.productModal.classList.contains("open") &&
           !el.flashSaleEditorModal.classList.contains("open") &&
-          !el.flashSaleTable.contains(document.activeElement)) bootstrapDashboard();
+          !el.flashSaleTable.contains(document.activeElement) &&
+          !el.ordersTable.contains(document.activeElement)) bootstrapDashboard();
     }, 5000);
   }
 
@@ -239,6 +253,8 @@
 
     stats.lowStockAlerts = filteredProducts(el.overviewCategoryFilter)
       .filter((product) => product.stock <= 10).length;
+    renderMonthlySalesHistory(stats.monthlySales, stats.currentMonth);
+    const currentMonthLabel = formatSalesMonth(stats.currentMonth);
 
     el.statsGrid.innerHTML = `
       <div class="stat-card">
@@ -257,7 +273,7 @@
           </div>
         </div>
         <div class="stat-value">${money(stats.totalSales)}</div>
-        <div class="stat-label">Total Sales</div>
+        <div class="stat-label">Sales — ${escapeHtml(currentMonthLabel)}</div>
       </div>
       <div class="stat-card orange">
         <div class="stat-card-top">
@@ -278,6 +294,33 @@
         <div class="stat-label">Low Stock Alerts</div>
       </div>
     `;
+  }
+
+  function formatSalesMonth(month) {
+    if (!/^\d{4}-\d{2}$/.test(String(month || ""))) return "Unknown month";
+    const [year, monthNumber] = month.split("-").map(Number);
+    return new Date(Date.UTC(year, monthNumber - 1, 1))
+      .toLocaleDateString("en-US", { month: "long", year: "numeric", timeZone: "UTC" });
+  }
+
+  function renderMonthlySalesHistory(monthlySales, currentMonth) {
+    const history = Array.isArray(monthlySales) ? [...monthlySales] : [];
+    if (currentMonth && !history.some((entry) => entry.month === currentMonth)) {
+      history.push({ month: currentMonth, totalSales: 0, orderCount: 0 });
+    }
+    history.sort((left, right) => right.month.localeCompare(left.month));
+
+    if (!history.length) {
+      el.monthlySalesTable.innerHTML = `<tr class="empty-row"><td colspan="3">No sales history yet.</td></tr>`;
+      return;
+    }
+
+    el.monthlySalesTable.innerHTML = history.map((entry) => `
+      <tr>
+        <td>${escapeHtml(formatSalesMonth(entry.month))}</td>
+        <td>${Number(entry.orderCount) || 0}</td>
+        <td>${money(entry.totalSales)}</td>
+      </tr>`).join("");
   }
 
   function renderLowStockTable() {
@@ -356,16 +399,10 @@
 
     el.ordersTable.innerHTML = state.orders.map((order) => {
       const status = String(order.status || "pending").toLowerCase();
-      const statusClass = {
-        pending: "orange",
-        paid: "green",
-        processing: "blue",
-        shipped: "blue",
-        completed: "green",
-        cancelled: "red"
-      }[status] || "gray";
       const date = new Date(order.createdAt);
       const orderedAt = Number.isNaN(date.getTime()) ? "—" : date.toLocaleString();
+      const options = [...orderStatusOptions];
+      if (!orderStatusLabels[status]) options.push([status, status]);
 
       return `<tr>
         <td class="order-number">#${escapeHtml(order.id)}</td>
@@ -374,10 +411,39 @@
         <td>${escapeHtml(order.phone)}</td>
         <td>${escapeHtml(order.paymentMethod)}</td>
         <td>${money(order.total)}</td>
-        <td><span class="pill ${statusClass}">${escapeHtml(status)}</span></td>
+        <td>
+          <select class="order-status-select" data-id="${escapeHtml(order.id)}"
+            aria-label="Update status for order ${escapeHtml(order.id)}">
+            ${options.map(([value, label]) => `<option value="${escapeHtml(value)}" ${value === status ? "selected" : ""}>${escapeHtml(label)}</option>`).join("")}
+          </select>
+        </td>
         <td>${escapeHtml(orderedAt)}</td>
       </tr>`;
     }).join("");
+
+    el.ordersTable.querySelectorAll(".order-status-select").forEach((select) => {
+      select.addEventListener("change", async () => {
+        const order = state.orders.find((item) => String(item.id) === select.dataset.id);
+        if (!order) return;
+        const previousStatus = order.status;
+        select.disabled = true;
+        try {
+          const updated = await api(`/api/admin/orders/${encodeURIComponent(order.id)}/status`, {
+            method: "PUT",
+            body: JSON.stringify({ status: select.value })
+          });
+          order.status = updated.status;
+          renderOrdersTable();
+          await renderStats();
+          showToast(`Order #${order.id} status updated to ${orderStatusLabels[order.status] || order.status}.`);
+        } catch (err) {
+          select.value = previousStatus;
+          showToast(err.message);
+        } finally {
+          if (select.isConnected) select.disabled = false;
+        }
+      });
+    });
   }
 
   function adminProductImage(product) {

@@ -76,6 +76,17 @@
   const money = (n) =>
     "₱" + Number(n).toLocaleString("en-PH", { minimumFractionDigits: 0, maximumFractionDigits: 0 });
 
+  const orderStatusLabels = {
+    pending: "Pending",
+    paid: "Paid",
+    processing: "Processing",
+    shipped: "Shipped",
+    on_the_way: "On the way",
+    completed: "Completed",
+    cancelled: "Cancelled",
+    returned: "Returned"
+  };
+
   function isFlashSaleActive(product) {
     return !!product.flashSale && Number(state.flashSaleEndsAt) > Date.now();
   }
@@ -1181,8 +1192,10 @@
 
   function accountOrderTemplate(order) {
     const items = order.items || [];
+    const status = String(order.status || "pending").toLowerCase();
+    const statusLabel = orderStatusLabels[status] || "Pending";
     return `<details class="account-order">
-      <summary class="account-order-header"><div><strong>Order #${order.id}</strong><span>${new Date(order.createdAt).toLocaleDateString()}</span></div><span class="account-order-meta"><span class="order-status">${order.status}</span><span class="account-order-toggle" aria-hidden="true"></span></span></summary>
+      <summary class="account-order-header"><div><strong>Order #${order.id}</strong><span>${new Date(order.createdAt).toLocaleDateString()}</span></div><span class="account-order-meta"><span class="order-status order-status-${orderStatusLabels[status] ? status : "pending"}">${statusLabel}</span><span class="account-order-toggle" aria-hidden="true"></span></span></summary>
       <div class="account-order-items">${items.map((item) => { const quantity = Number(item.quantity) || 1; const unitPrice = Number(item.unitPrice) || (Number(item.lineTotal) / quantity); return `<div class="account-order-item"><div class="account-order-image">${productImageMarkup({ id: item.productId, title: item.productTitle, category: item.category || "", image: item.image })}</div><div class="account-order-item-info"><strong>${item.productTitle}</strong><span>${money(unitPrice)} each · Qty ${quantity}</span></div><strong>${money(item.lineTotal || unitPrice * quantity)}</strong></div>`; }).join("")}</div>
       <div class="account-order-summary"><span>Total <strong>${money(order.total)}</strong></span></div>
     </details>`;

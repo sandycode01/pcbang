@@ -76,6 +76,15 @@ async function initializeDatabase() {
     if (!orderUserIndex[0].count) {
       await connection.query("ALTER TABLE orders ADD INDEX idx_orders_user (user_id)");
     }
+    const [orderStatusColumn] = await connection.query(
+      `SELECT column_type AS columnType FROM information_schema.columns
+       WHERE table_schema = DATABASE() AND table_name = 'orders' AND column_name = 'status'`
+    );
+    if (orderStatusColumn[0]?.columnType.startsWith("enum(")) {
+      await connection.query(
+        "ALTER TABLE orders MODIFY COLUMN status VARCHAR(32) NOT NULL DEFAULT 'pending'"
+      );
+    }
 
     await connection.query(
       `INSERT IGNORE INTO categories (id, name, icon) VALUES ${categories.map(() => "(?, ?, ?)").join(",")}`,

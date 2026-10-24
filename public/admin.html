@@ -86,6 +86,21 @@
         <!-- populated by JS -->
       </div>
 
+      <div class="admin-panel monthly-sales-panel">
+        <div class="admin-panel-header">
+          <div>
+            <h3>Monthly Sales History</h3>
+            <p class="monthly-sales-note">Includes paid, processing, shipped, on-the-way, and completed orders. Cancelled and returned orders are excluded.</p>
+          </div>
+        </div>
+        <div class="admin-table-wrap">
+          <table class="admin-table monthly-sales-table" id="monthlySalesTable">
+            <thead><tr><th>Month</th><th>Qualifying Orders</th><th>Sales</th></tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+
       <div class="admin-filters" aria-label="Low stock category filter">
         <div class="admin-filter-group">
           <label for="overviewCategoryFilter">Category</label>
@@ -161,7 +176,7 @@
                 <th>Contact Number</th>
                 <th>Payment Method</th>
                 <th>Total</th>
-                <th>Status</th>
+                <th>Status / Action</th>
                 <th>Date Ordered</th>
               </tr>
             </thead>

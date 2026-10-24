@@ -38,8 +38,9 @@ category preferences, and recent searches remain browser-local.
 
 **Admin dashboard (`/admin`)**
 - Hardcoded login (`admin` / `admin123`) — session token stored in `sessionStorage`
-- Overview: total products, estimated sales based on sold counts and regular
-  discount prices, active categories, and low-stock alerts
+- Overview: total products, sales for the current month, active categories, and
+  low-stock alerts. Monthly sales history is calculated from saved orders and
+  retained across months
 - Overview, Product Management, and Flash Sale each have an independent category
   filter. The Overview filter applies to its low-stock table and alert count;
   the other filters only affect their own tables
@@ -47,11 +48,16 @@ category preferences, and recent searches remain browser-local.
   title, category, price, discount price, stock, rating, specs, image, and
   optional compatibility data
 - Customer Orders: newest-first order list with order number, customer, delivery
-  destination, contact number, payment method, total, status, and date ordered
+  destination, contact number, payment method, total, date ordered, and an
+  editable status (Pending, Shipped, On the way, Cancelled, or Returned).
+  Customers see the latest status in My Account
 - Flash Sale Management: toggle products into the sale, set an independent sale
   price, view stock, and manage a shared live campaign countdown. Sale prices
   automatically stop applying when the campaign expires; each product then
   returns to its regular selling price (including any standard discount)
+- Monthly sales include Paid, Processing, Shipped, On the way, and Completed
+  orders. Pending, Cancelled, and Returned orders are excluded; order records
+  remain stored so monthly history is kept
 - Admin-uploaded product images are stored in a persistent Docker volume when
   using Docker Compose
 - Admin data tables have a viewport-limited height and independent scrolling;
@@ -266,6 +272,11 @@ corresponding login endpoint in the `Authorization` header.
 - `GET /api/admin/stats`
 - `GET /api/admin/products`
 - `GET /api/admin/orders` — customer and order summary, newest first
+- `PUT /api/admin/orders/:id/status` — update status to `pending`, `shipped`,
+  `on_the_way`, `cancelled`, or `returned` (legacy `paid`, `processing`, and
+  `completed` statuses are also accepted)
+- The stats response includes current-month `totalSales` and `monthlySales`
+  history for qualifying order statuses
 - `GET /api/admin/flash-sale`
 - `POST /api/admin/upload-image` — multipart field `image`; accepts PNG, JPEG,
   WEBP, or GIF files up to 5 MB. Returns the persistent image URL
