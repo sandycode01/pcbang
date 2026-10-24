@@ -33,10 +33,11 @@
         </button>
       </form>
       <div class="header-actions">
-        <a class="header-action" href="/store.html" aria-label="Shop products">
+        <button class="header-action" id="cartBtn" type="button" aria-label="Open cart" aria-controls="cartPanel" aria-expanded="false">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3h2l2.7 13.4a2 2 0 0 0 2 1.6h9.7a2 2 0 0 0 2-1.6L23 8H6"/></svg>
-          <span class="action-label">Shop</span>
-        </a>
+          <span class="action-label">Cart</span>
+          <span class="cart-count hidden" id="cartCount">0</span>
+        </button>
       </div>
     </div>
     <nav class="category-nav" aria-label="Main navigation">
@@ -46,6 +47,22 @@
       </div>
     </nav>
   </header>
+
+  <div class="overlay" id="overlay"></div>
+  <aside class="cart-panel" id="cartPanel" aria-label="My Cart" aria-hidden="true">
+    <div class="cart-header">
+      <h3>My Cart</h3>
+      <button class="close-btn" id="closeCartBtn" type="button" aria-label="Close cart">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="18" x2="6" y2="6"/><line x1="6" y1="18" x2="18" y2="6"/></svg>
+      </button>
+    </div>
+    <div class="cart-items" id="cartItems"></div>
+    <div class="cart-footer">
+      <div class="cart-subtotal-row"><span>Subtotal</span><span id="cartSubtotal">₱0</span></div>
+      <div class="cart-total-row"><span>Total</span><span id="cartTotal">₱0</span></div>
+      <button class="checkout-btn" id="checkoutBtn" type="button" disabled>Proceed to Checkout</button>
+    </div>
+  </aside>
 
   <main class="container compatibility-page">
     <section class="section pc-builder-section" id="pcBuilder">

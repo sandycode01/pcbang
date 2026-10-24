@@ -274,6 +274,12 @@
       renderFilterPills();
       applyFilters();
       startProductRefresh();
+      if (params.get("openCart") === "1") {
+        openCart();
+        params.delete("openCart");
+        const query = params.toString();
+        window.history.replaceState({}, "", `${window.location.pathname}${query ? `?${query}` : ""}${window.location.hash}`);
+      }
     } catch (err) {
       console.error("Failed to load storefront data:", err);
       el.productGrid.innerHTML = `<div class="empty-state">Couldn't load products. Please make sure the server is running.</div>`;
